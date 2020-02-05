@@ -61,7 +61,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\InputHandler.cs" />
+    <Compile Include="Assets\Scripts\00.Command\ICommand.cs" />
+    <Compile Include="Assets\Scripts\00.Command\MoveUnitCommand.cs" />
+    <Compile Include="Assets\Scripts\00.Command\RotateUnitCommand.cs" />
+    <Compile Include="Assets\Scripts\01.Manager\TimeScaleManager.cs" />
+    <Compile Include="Assets\Scripts\10.Input\InputHandler.cs" />
+    <Compile Include="Assets\Scripts\20.Behaviour\DumbAI.cs" />
+    <Compile Include="Assets\Scripts\20.Behaviour\MoveHandler.cs" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>Z:/testGame/ProjectSH/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
     </Reference>
