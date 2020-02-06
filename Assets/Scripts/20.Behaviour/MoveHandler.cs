@@ -3,14 +3,31 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class MoveHandler : MonoBehaviour {
+    Rigidbody2D rgbd;
+    readonly float speed = 4f;
+
+    private void Awake()
+    {
+        rgbd = GetComponent<Rigidbody2D>();
+    }
+
 
     public void MoveTo(Vector2 dir)
     {
-        transform.Translate(dir * Time.deltaTime * 5, Space.World);
+        dir *= speed;
+
+        rgbd.velocity = dir;
     }
 
     public void MoveRelativeRotation(Vector2 dir)
     {
-        transform.Translate(dir * Time.deltaTime * 5, Space.Self);
+        dir *= speed;
+
+        float angle = Mathf.Deg2Rad * transform.eulerAngles.z;
+
+        Vector2 newDir = new Vector2(
+            (Mathf.Cos(angle) * dir.x) + (-Mathf.Sin(angle) * dir.y), 
+            (Mathf.Sin(angle) * dir.x) + (Mathf.Cos(angle) * dir.y));
+        rgbd.velocity = newDir;
     }
 }

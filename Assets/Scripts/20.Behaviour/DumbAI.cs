@@ -10,9 +10,14 @@ public class DumbAI : MonoBehaviour {
     {
         moveCommand = new MoveUnitCommand(Vector2.right, Space.Self);
         rotateCommand = new RotateUnitCommand();
-        StartCoroutine(Patrol());
     }
-    
+
+    private void Start()
+    {
+        StartCoroutine(Patrol());
+
+    }
+
 
     IEnumerator Patrol()
     {
