@@ -3,19 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class Test2 : EditorWindow
+public class MapEditor : EditorWindow
 {
-    static MapXmlParser data;
+    static MapDataManager data;
     BrushType brushNow = BrushType.WALL;
     Vector2Int tmpSom;
     Vector2 scrollPos;
     Rect[,] rects;
 
-    readonly Vector2 gridStartPos = new Vector2(55, 60);
+    readonly float boxSize = 25;
     readonly Vector2 scrollStartPos = new Vector2(30, 60);
     readonly Vector2 scrollArea = new Vector2(400, 250);
-    readonly Vector2 boxSize = new Vector2Int(25, 25);
+    readonly Vector2 gridStartPos = new Vector2(55, 60);
     readonly Rect gridRect = new Rect(30 + 25, 60 + 25, 400 - 65, 250 - 65);
+    readonly Vector2 underScrollArea = new Vector2(0, 340);
     readonly Color[] colors = {
         Color.white,
         new Color(0.5f, 0.5f, 1f, 1),
@@ -31,8 +32,8 @@ public class Test2 : EditorWindow
     [MenuItem("Window/Map Editor Window")]
     static void Init()
     {
-        data = CreateInstance<MapXmlParser>();
-        Test2 window = GetWindow<Test2>("Map Editor");
+        data = CreateInstance<MapDataManager>();
+        MapEditor window = GetWindow<MapEditor>("Map Editor");
         window.Show();
     }
 
@@ -47,7 +48,7 @@ public class Test2 : EditorWindow
             tmpSom.x = Mathf.Clamp(tmpSom.x, 0, 50);
             tmpSom.y = Mathf.Clamp(tmpSom.y, 0, 50);
             if (GUILayout.Button("Generate", GUILayout.Width(100))){
-                GenerateMap();
+                GenerateNewMap();
             }
         }
         EditorGUILayout.EndHorizontal();
@@ -72,25 +73,61 @@ public class Test2 : EditorWindow
                 }) + 1;
         }
         GUILayout.EndHorizontal();
+        GUILayout.BeginHorizontal(GUILayout.Width(400));
+        {
+            if (GUI.Button(new Rect(underScrollArea, new Vector2(150, EditorGUIUtility.singleLineHeight)), "Load Map"))
+            {
+                string path = EditorUtility.OpenFilePanel("Open Map Data", "", "xml");
+                if (path.Length != 0)
+                {
+                    Debug.Log("Load Path >>" + path);
+                    data.LoadMapData(path);
+                    LoadMap();
+                }
+            }
+
+            Rect r = new Rect(underScrollArea, new Vector2(150, EditorGUIUtility.singleLineHeight));
+            r.position = new Vector2(r.position.x + 150 + 30, r.position.y);
+
+            if(GUI.Button(r, "Save Map"))
+            {
+                string path = EditorUtility.SaveFilePanel("Save Map Data", "", "New Map","xml");
+                if (path.Length != 0)
+                {
+                    Debug.Log("Save Map Data At >>" + path);
+                    data.SaveMapData(path);
+                    AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+                }
+            }
+        }
+        GUILayout.EndHorizontal();
     }
 
-    void GenerateMap()
+
+    void GenerateNewMap()
     {
+        data.ClearMapData();
         data.SetMapSize(tmpSom);
-        scrollPos = Vector2.zero;
+        GenerateBoxGrid();
+    }
+
+    void LoadMap()
+    {
+        tmpSom = data.source.mapSize;
+        GenerateBoxGrid();
+    }
+
+    void GenerateBoxGrid()
+    {
         rects = new Rect[data.source.mapSize.x, data.source.mapSize.y];
-        data.source.walls.Clear();
-        data.source.enemySpawns.Clear();
-        data.SetPlayerSpawn(Vector2Int.zero);
-        data.SetMapName("New Map");
 
         for (int y = 0; y < data.source.mapSize.y; y++)
         {
-            for(int x = 0; x < data.source.mapSize.x; x++)
+            for (int x = 0; x < data.source.mapSize.x; x++)
             {
                 rects[x, y] = new Rect(
-                    25 * x + 25, (data.source.mapSize.y * 25 - 25 * y),
-                    25, 25);
+                    boxSize * x + boxSize, (data.source.mapSize.y * boxSize - boxSize * y),
+                    boxSize, boxSize);
             }
         }
     }
@@ -104,7 +141,7 @@ public class Test2 : EditorWindow
 
         scrollPos = GUI.BeginScrollView(new Rect(scrollStartPos, scrollArea),
             scrollPos,
-            new Rect(0, 0, data.source.mapSize.x * 25 + 50, data.source.mapSize.y * 25 + 50));
+            new Rect(0, 0, data.source.mapSize.x * boxSize + 50, data.source.mapSize.y * boxSize + 50));
 
         for(int y = 0; y < data.source.mapSize.y; y++)
         {
@@ -164,8 +201,8 @@ public class Test2 : EditorWindow
         Vector2 result = pos;
         result += scrollPos;
         result -= gridStartPos;
-        result.x = Mathf.FloorToInt(result.x / 25);
-        result.y = data.source.mapSize.y - Mathf.FloorToInt(result.y / 25);
+        result.x = Mathf.FloorToInt(result.x / boxSize);
+        result.y = data.source.mapSize.y - Mathf.FloorToInt(result.y / boxSize);
         return new Vector2Int((int)result.x, (int)result.y);
     }
 

@@ -13,9 +13,9 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
+  - Wall
+  - Character
+  - Bullet
   - 
   - 
   - 
@@ -52,4 +52,7 @@ TagManager:
     locked: 0
   - name: Obstacle
     uniqueID: 172934719
+    locked: 0
+  - name: UI
+    uniqueID: 2271063073
     locked: 0

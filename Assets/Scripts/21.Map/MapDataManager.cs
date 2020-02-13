@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Xml;
+using System.Xml.Serialization;
 using System.IO;
 
-public class MapXmlParser : ScriptableObject {
+public class MapDataManager : ScriptableObject {
     enum TYPE { WALLS, ENEMYSPAWNS }
-    const string xmlFileDirectory = "Data/Map/";
     const string MAP = "map";
     const string NAME = "name";
     const string SIZE = "size";
@@ -17,11 +17,16 @@ public class MapXmlParser : ScriptableObject {
 
     public MapDataSource source = new MapDataSource();
 
-    public void SaveMapData()
+    #region do not use this code anymore
+    /*
+    public void SaveMapData(string mapPath)
     {
+        string[] tmpStr = mapPath.Split('/');
+        SetMapName(tmpStr[tmpStr.Length - 1].Substring(0, tmpStr[tmpStr.Length - 1].Length - ".xml".Length));
+
         XmlWriterSettings settings = new XmlWriterSettings();
         settings.Encoding = System.Text.Encoding.Unicode;
-        using (XmlWriter writer = XmlWriter.Create(Path.Combine(xmlFileDirectory, source.mapName + ".xml"), settings))
+        using (XmlWriter writer = XmlWriter.Create(mapPath, settings))
         {
             writer.WriteStartDocument();
             writer.WriteStartElement(MAP);
@@ -52,14 +57,27 @@ public class MapXmlParser : ScriptableObject {
         }
     }
 
-    public void LoadMapData(string mapName)
+    public void LoadMapData(string mapPath)
     {
-        string txt = File.ReadAllText(xmlFileDirectory + mapName + ".xml", System.Text.Encoding.Unicode);
+        string[] tmpStr = mapPath.Split('.');
+        tmpStr = tmpStr[0].Split('/');
+        string newPath = tmpStr[0];
+        for (int i = 1; i < tmpStr.Length; i++)
 
-        if (txt == null || txt == "")
+        {
+            if (tmpStr[i] == "Resources")
+                newPath = "";
+            else
+                newPath = Path.Combine(newPath, tmpStr[i]);
+        }
+        Debug.Log("Load Path >> " + newPath);
+        TextAsset textAsset = Resources.Load<TextAsset>(newPath);
+        Debug.Log("textAsset text >> " + textAsset.text);
+        if (textAsset == null || textAsset.text == "")
             return;
+
         source.Clear();
-        using (XmlReader reader = XmlReader.Create(txt))
+        using (XmlReader reader = XmlReader.Create(new StringReader(textAsset.text)))
         {
             TYPE t = TYPE.WALLS;
 
@@ -73,7 +91,7 @@ public class MapXmlParser : ScriptableObject {
                             SetMapSize(Str2Vec2(reader.ReadString()));
                             break;
                         case NAME:
-                            source.mapName = reader.ReadString();
+                            SetMapName(reader.ReadString());
                             break;
                         case PLAYERSPAWN:
                             SetPlayerSpawn(Str2Vec2(reader.ReadString()));
@@ -93,6 +111,26 @@ public class MapXmlParser : ScriptableObject {
                     }
                 }
             }
+        }
+    }*/
+    #endregion
+
+    public void SaveMapData(string mapPath)
+    {
+        using (StreamWriter sw = new StreamWriter(mapPath))
+        {
+            XmlSerializer xs = new XmlSerializer(typeof(MapDataSource));
+            xs.Serialize(sw, source);
+            Debug.Log(sw.ToString());
+        }
+    }
+
+    public void LoadMapData(string mapPath)
+    {
+        using (StreamReader sr = new StreamReader(mapPath))
+        {
+            XmlSerializer xs = new XmlSerializer(typeof(MapDataSource));
+            source = xs.Deserialize(sr) as MapDataSource;
         }
     }
 
@@ -124,15 +162,21 @@ public class MapXmlParser : ScriptableObject {
 
     public void SetWall(Vector2Int coord)
     {
-        if (CanSet(coord) == false || 
+        if (CanSet(coord) == false ||
             CheckCollision(coord, source.playerSpawn) ||
             CheckCollision(coord, source.enemySpawns))
             return;
 
         if (source.walls.Contains(coord))
+        {
             source.walls.Remove(coord);
+            Debug.Log("Unset Wall to " + coord);
+        }
         else
+        {
             source.walls.Add(coord);
+            Debug.Log("Set Wall to " + coord);
+        }
     }
 
     public void SetPlayerSpawn(Vector2Int coord)
@@ -143,6 +187,7 @@ public class MapXmlParser : ScriptableObject {
             return;
 
         source.playerSpawn = coord;
+        Debug.Log("Set Player Spawn at " + coord);
     }
 
     public void SetEnemySpawn(Vector2Int coord)
@@ -153,17 +198,28 @@ public class MapXmlParser : ScriptableObject {
             return;
 
         if (source.enemySpawns.Contains(coord))
+        {
             source.enemySpawns.Remove(coord);
+            Debug.Log("Unset Enemy spawn at " + coord);
+        }
         else
+        {
             source.enemySpawns.Add(coord);
+            Debug.Log("Set Eenmy spawn at " + coord);
+        }
     }
 
     public void SetMapSize(Vector2Int size)
     {
         if (size.x < 0 || size.y < 0)
             return;
-
+        Debug.Log("Set Map Size to " + size);
         source.mapSize = size;
+    }
+
+    public void ClearMapData()
+    {
+        source.Clear();
     }
 
     bool CanSet(Vector2Int coord)

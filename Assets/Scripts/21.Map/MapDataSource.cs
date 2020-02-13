@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MapDataSource {
+[System.Serializable]
+public class MapDataSource : ScriptableObject{
     public Vector2Int mapSize;
     public string mapName;
     public List<Vector2Int> walls = new List<Vector2Int>();
@@ -15,6 +16,6 @@ public class MapDataSource {
         mapName = "New Map";
         walls.Clear();
         enemySpawns.Clear();
-        playerSpawn = Vector2Int.one;
+        playerSpawn = Vector2Int.zero;
     }
 }
