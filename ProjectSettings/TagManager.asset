@@ -13,9 +13,9 @@ TagManager:
   - UI
   - 
   - 
-  - 
-  - 
-  - 
+  - Wall
+  - Character
+  - Bullet
   - 
   - 
   - 
@@ -40,4 +40,19 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Floor
+    uniqueID: 914187635
+    locked: 0
+  - name: Item
+    uniqueID: 193951515
+    locked: 0
+  - name: Character
+    uniqueID: 1604540209
+    locked: 0
+  - name: Obstacle
+    uniqueID: 172934719
+    locked: 0
+  - name: UI
+    uniqueID: 2271063073
     locked: 0
