@@ -3,21 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
+
 public class WorldMaker : MonoBehaviour {
     MapDataManager mdm;
     public Tilemap obstacleGrid;
     public Tile obstacle;
     string dataFilePath;
+    GameManager gm;
 
     private void Awake()
     {
+        gm = GetComponent<GameManager>();
         mdm = new MapDataManager();
         dataFilePath = Application.dataPath + "/Resources/MapData/";
     }
 
-    private void OnEnable()
+    private void Start()
     {
         SetTileMap();
+        gm.SetGameState(GAMESTATE.MAP_READY);
     }
 
     public void SetTileMap()

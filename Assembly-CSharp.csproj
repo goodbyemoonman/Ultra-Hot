@@ -64,6 +64,7 @@
     <Compile Include="Assets\Scripts\00.Command\ICommand.cs" />
     <Compile Include="Assets\Scripts\00.Command\MoveUnitCommand.cs" />
     <Compile Include="Assets\Scripts\00.Command\RotateUnitCommand.cs" />
+    <Compile Include="Assets\Scripts\01.Manager\GameManager.cs" />
     <Compile Include="Assets\Scripts\01.Manager\TimeScaleManager.cs" />
     <Compile Include="Assets\Scripts\10.Input\InputHandler.cs" />
     <Compile Include="Assets\Scripts\20.Behaviour\DumbAI.cs" />

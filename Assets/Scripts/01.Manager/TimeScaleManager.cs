@@ -2,89 +2,52 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TimeScaleManager : MonoBehaviour {
-    TimeState accelState = new AccelTimeState();
-    TimeState decelState = new DecelTimeState();
-    TimeState timeState;
+public enum INPUTTYPE { NONE, MOUSE, KEYBOARD };
 
+public class TimeScaleManager : MonoBehaviour {
+    readonly float scaler = 0.03f;
     public bool canScale = true;
-    float goal;
+    float target;
 
     private void Start()
     {
-        timeState = decelState;
         StartCoroutine(ControlTimeScale());
     }
 
     IEnumerator ControlTimeScale()
     {
+        target = 0;
+
         while (canScale)
         {
-            timeState.Update(goal);
+            Time.timeScale = Mathf.Lerp(Time.timeScale, target, scaler);
             yield return new WaitForSecondsRealtime(0.025f);
         }
     }
 
-    public void SetTimeScale(float to)
+    public void SetInputType(INPUTTYPE input)
     {
-        goal = to;
-        if (Time.timeScale < to)
+        switch (input)
         {
-            timeState = accelState;
+            case INPUTTYPE.NONE:
+                target = 0.1f;
+                break;
+            case INPUTTYPE.MOUSE:
+                target = 0.25f;
+                break;
+            case INPUTTYPE.KEYBOARD:
+                target = 1f;
+                break;
         }
-        else
-            timeState = decelState;
     }
 
-    public void SetTimeScale(float to, bool isEmergency)
+    public void SetTimeScaleimmediately(float to)
     {
-        if (isEmergency)
-        {
-            Time.timeScale = to;
-            return;
-        }
-        else
-            SetTimeScale(to);
+        Time.timeScale = Mathf.Clamp01(to);
     }
 
     private void OnGUI()
     {
         GUI.Label(new Rect(0, 0, 100, 50), Time.timeScale.ToString());
-    }
-}
-
-abstract class TimeState
-{
-    protected readonly float MINTIMESCALE = 0.1f;
-
-    public abstract void Update(float goal);
-    protected float GetBig(float a, float b)
-    {
-        return (a < b) ? b : a;
-    }
-}
-
-class AccelTimeState : TimeState
-{ 
-    public override void Update(float goal)
-    {
-        Time.timeScale = Mathf.Clamp(Time.timeScale + 0.0125f, MINTIMESCALE, GetBig(goal, 1f));
-    }
-
-}
-
-class DecelTimeState : TimeState
-{
-    public override void Update(float goal)
-    {
-        Time.timeScale = Mathf.Clamp(Time.timeScale - 0.025f, GetBig(MINTIMESCALE, goal), 1f);
-    }
-}
-
-class NullTimeState : TimeState
-{
-    public override void Update(float goal)
-    {
-
     }
 }

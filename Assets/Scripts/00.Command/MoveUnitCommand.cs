@@ -21,13 +21,17 @@ public class MoveUnitCommand : ICommand
             return;
         }
         if (space == Space.World)
-            obj.SendMessage("MoveTo", dir);
+            obj.SendMessage("MoveToWorldDir", dir);
         else
-            obj.SendMessage("MoveRelativeRotation", dir);
+            obj.SendMessage("MoveToSelfDir", dir);
+
+        dir = Vector2.zero;
     }
 
     public void SetDirection(Vector2 dir)
     {
+        if (dir == Vector2.zero)
+            return;
         this.dir = dir;
     }
 }

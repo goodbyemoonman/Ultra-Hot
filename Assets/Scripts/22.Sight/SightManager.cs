@@ -21,6 +21,7 @@ public class SightManager : MonoBehaviour
 
     private void Awake()
     {
+        GetComponent<GameManager>().GameStateObserver += GameStateObserve;
         wallLayer = 1 << LayerMask.NameToLayer("Wall");
         deadSight = new List<GameObject>();
         liveSight = new List<GameObject>();
@@ -31,7 +32,12 @@ public class SightManager : MonoBehaviour
             go.SetActive(false);
             deadSight.Add(go);
         }
-        StartCoroutine(FogUpdate());
+    }
+
+    public void GameStateObserve(GAMESTATE state)
+    {
+        if (state == GAMESTATE.MAP_READY)
+            StartCoroutine(FogUpdate());
     }
     
     IEnumerator FogUpdate()
@@ -39,7 +45,7 @@ public class SightManager : MonoBehaviour
         while(true)
         {
             SetFog();
-            yield return new WaitForSecondsRealtime(0.02f);
+            yield return new WaitForSecondsRealtime(0.05f);
         }
     }
 
@@ -69,6 +75,7 @@ public class SightManager : MonoBehaviour
         for (int i = 0; i < fogpos.Length; i++)
         {
             fogpos[i] += center;
+            
             if (IsOnScreen(fogpos[i]) && !IsFogByWall(center, fogpos[i]))
             {
                 while (count > liveSight.Count - 1)
