@@ -15,6 +15,8 @@ public class SightManager : MonoBehaviour
     readonly int maxY = 12;
     readonly int maxSight = 12;
     readonly int maxHeight = 6;
+    readonly float rotateAngleRad = 1.107f;     //63도 정도?
+    readonly float baseRotateAngleRad = 2.3f; //120도 정도?
     RaycastHit2D hit;
 
     private void Awake()
@@ -45,69 +47,70 @@ public class SightManager : MonoBehaviour
     {
         Vector3 center = playerTf.position;
         float angle = playerTf.eulerAngles.z;
-        int count = 0;
-        for(float f = 0; f < maxSight; f += 0.5f)
+        //(0, 0)을 중심으로 베이스 라인 그리기
+        Vector3[] basePos = GetBaseLinePositions();
+        //베이스라인 회전시키면서 시야 그리기.
+        Vector3[] fogpos = new Vector3[0];
+        for(int i = 0; i < basePos.Length; i++)
         {
-            Vector3[] newPos = GetSightPosition(f, center);
-            newPos = RotatePosition(newPos, angle, center);
-            for(int j = 0; j < newPos.Length; j++)
+            //현재 점과 캐릭터 사이의 거리를 반지름(half diameter)이라 했을 때
+            //시야각만큼 회전시 나온 distance를 갖고 
+            //distance의 0.5 마다 시야를 하나씩 배치
+            fogpos = ArrayAppend(
+                fogpos,
+                GetCurvedFogPositon(
+                    GetDistance(GetDiameter(basePos[i])), 
+                    basePos[i]));
+        }
+        //만들어진 시야 캐릭터의 방향에 맞게 회전
+        fogpos = RotatePosition(fogpos, angle);
+        //시야 잘라내기
+        int count = 0;
+        for (int i = 0; i < fogpos.Length; i++)
+        {
+            fogpos[i] += center;
+            if (IsOnScreen(fogpos[i]) && !IsFogByWall(center, fogpos[i]))
             {
-                if (IsOnScreen(newPos[j]) && !IsFogByWall(center, newPos[j]))
-                {
-                    while (count > liveSight.Count - 1)
-                        TurnSightOn();
-                    liveSight[count].transform.position = newPos[j];
-                    count++;
-                }
+                while (count > liveSight.Count - 1)
+                    TurnSightOn();
+                liveSight[count].transform.position = fogpos[i];
+                count++;
             }
         }
 
-        //할당된 시야가 살아있는 시야보다 많다면 남은 살아있는 시야를 죽임.
         if(count < liveSight.Count)
         {
             TurnSightOff(liveSight.Count - count);
         }
+
     }
 
-    Vector3[] GetSightPosition(float x, Vector3 center)
-    {
-        //this function will return y in "y = 2|x - center.x| + center.y" 
-        Vector3[] result = new Vector3[1 + (int)(x * 4 * 2)];
-        for (int i = 0; i < (x * 4 * 2) + 1; i++)
-        {
-            result[i] = new Vector3(x, i * 0.5f - (x * 2), 0);
-            result[i] += center;
-        }
-        return result;
-    }
-
-    Vector3[] GetBaseLinePositions(Vector3 startPos)
+    Vector3[] GetBaseLinePositions()
     {
         //this function will return Vector in y = 2x 
-        // 0 <= x <= 6  // 0 <= y <= 12 // number of result = 12 * 4 + 1;
-        Vector3[] result = new Vector3[maxSight * 4 + 1];
-        int count = 0;
-        for(float x = 0; x <= maxX; x += (6 / 48))
+        // 0.25 <= x <= 6  // 0 <= y <= 12 // number of result = 12 * 4 + 1;
+        // x가 6일때의 길이와 시야의 길이가 맵에서 가장 길 때의 길이가 같음.
+        int maxNum = maxSight * 3 + 1;
+        Vector3[] result = new Vector3[maxNum];
+        float x = 0.33f;
+        for (int i = 0; i < maxNum; i++)
         {
-            result[count] = new Vector3(x, x * 2f, 0);
-            result[count] += startPos;
-            count++;
+            result[i] = new Vector3(x, 2 * x, 0);
+            x += (maxX - 0.033f) / (maxNum);
         }
         return result;
     }
 
-    Vector3[] RotatePosition(Vector3[] pos, float degree, Vector3 center)
+    Vector3[] RotatePosition(Vector3[] pos, float degree)
     {
         Vector3[] result = new Vector3[pos.Length];
         float cos = Mathf.Cos(degree * Mathf.Deg2Rad);
         float sin = Mathf.Sin(degree * Mathf.Deg2Rad);
         for (int i = 0; i < pos.Length; i++)
         {
-            pos[i] -= center;
             result[i].x = pos[i].x * cos - pos[i].y * sin;
             result[i].y = pos[i].x * sin + pos[i].y * cos;
             result[i].z = 0;
-            result[i] += center;
         }
 
         return result;
@@ -166,5 +169,46 @@ public class SightManager : MonoBehaviour
             return false;
         else
             return true;
+    }
+
+    float GetDiameter(Vector2 pos)
+    {
+        return (pos.x * Mathf.Cos(-rotateAngleRad) - pos.y * Mathf.Sin(-rotateAngleRad)) * 2f;
+    }
+
+    float GetDistance(float diameter)
+    {
+        return diameter * Mathf.PI * (2 * Mathf.PI / baseRotateAngleRad);
+    }
+
+    Vector3[] GetCurvedFogPositon(float distance, Vector3 baseLinePos)
+    {
+        int count = CountFogPositionOnCurve(distance);
+        if (count == 0)
+            return null;
+        float rotateAngle = baseRotateAngleRad / count;
+        float cos = Mathf.Cos(-rotateAngle);
+        float sin = Mathf.Sin(-rotateAngle);
+        Vector3[] result = new Vector3[count];
+        result[0] = baseLinePos;
+        result[result.Length - 1] = baseLinePos;
+        result[result.Length - 1].y *= -1;
+        for(int i = 1; i < count * 0.5f; i++)
+        {
+            result[i] = new Vector3(
+                cos * result[i - 1].x - sin * result[i - 1].y,
+                sin * result[i - 1].x + cos * result[i - 1].y);
+            //count가 홀수 일 때 연산을 두번 하게 되지만 큰 상관은 없는것같음. 
+            result[result.Length - 1 - i] = new Vector3(
+                result[i].x, -result[i].y);
+
+        }
+
+        return result;
+    }
+
+    int CountFogPositionOnCurve(float distance)
+    {
+        return Mathf.CeilToInt(distance * 2f);
     }
 }
