@@ -8,25 +8,29 @@ public class TestScript : MonoBehaviour {
     readonly float rotateAngleRad = 1.107f;
     readonly float baseRotateAngleRad = 2.3f;
     List<GameObject> prefabs = new List<GameObject>();
+    public Vector3 center;
+    public Vector3 target;
 
     private void OnEnable()
     {
-        Vector3 pos = new Vector3(1, 0, 0);
-        Vector3[] poses = GetBaseLinePositions(pos);
-        Vector3 pos2 = Vector3.zero;
-        Vector3[] pos2s = GetBaseLinePositions(pos2);
-        poses = ArrayAppend(poses, pos2s);
-        for(int i = 0; i < poses.Length; i++)
-        {
-            if(prefabs.Count - 1 < i)
-            {
-                prefabs.Add(Instantiate(prefab));
-            }
-
-            prefabs[i].transform.position = poses[i];
-        }
+        Debug.Log(Vector3.SignedAngle(Vector3.right, target - center, -Vector3.right));
     }
-    
+
+    Vector3 GetRayHitPos(Vector3 center, Vector3 target)
+    {
+        RaycastHit2D hit;
+        int wallLayer = 1 << LayerMask.NameToLayer("Wall");
+        //(5, 10) 을 원점 기준으로 회전시켰기 때문에 모든 점의 거리는 동일하다
+        float distance = 11.18f;
+        hit = Physics2D.Raycast(center, target - center, distance, wallLayer);
+        if (hit.collider != null)
+        {
+            return hit.point;
+        }
+        else
+            return target;
+    }
+
     Vector3[] ArrayAppend(Vector3[] left, Vector3[] right)
     {
         Vector3[] result = new Vector3[left.Length + right.Length];
@@ -58,27 +62,31 @@ public class TestScript : MonoBehaviour {
         return Mathf.CeilToInt(distance * 2f);
     }
 
-    Vector3[] GetCurvedFogPositon(float distance, Vector3 basePosition)
+    Vector3[] GetCurvedFogPositon(Vector3 baseLinePos)
     {
+        float distance = GetDistance(GetDiameter(baseLinePos));
         int count = CountFogPositionOnCurve(distance);
+        Debug.Log("Count : " + count.ToString());
         if (count == 0)
             return null;
         float rotateAngle = baseRotateAngleRad / count;
         float cos = Mathf.Cos(-rotateAngle);
         float sin = Mathf.Sin(-rotateAngle);
         Vector3[] result = new Vector3[count];
-        result[0] = basePosition;
-        result[result.Length - 1] = basePosition;
+        result[0] = baseLinePos;
+        result[result.Length - 1] = baseLinePos;
         result[result.Length - 1].y *= -1;
         for (int i = 1; i < count * 0.5f; i++)
         {
-            result[i] = new Vector2(
+            result[i] = new Vector3(
                 cos * result[i - 1].x - sin * result[i - 1].y,
                 sin * result[i - 1].x + cos * result[i - 1].y);
             //count가 홀수 일 때 연산을 두번 하게 되지만 큰 상관은 없는것같음. 
-            result[result.Length - 1 - i] = new Vector2(result[i].x, -result[i].y);
+            result[result.Length - 1 - i] = new Vector3(
+                result[i].x, -result[i].y);
 
         }
+
         return result;
     }
 
