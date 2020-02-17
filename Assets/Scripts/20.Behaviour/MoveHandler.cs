@@ -12,14 +12,14 @@ public class MoveHandler : MonoBehaviour {
     }
 
 
-    public void MoveTo(Vector2 dir)
+    public void MoveToWorldDir(Vector2 dir)
     {
         dir *= speed;
 
         rgbd.velocity = dir;
     }
 
-    public void MoveRelativeRotation(Vector2 dir)
+    public void MoveToSelfDir(Vector2 dir)
     {
         dir *= speed;
 

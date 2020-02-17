@@ -4,86 +4,51 @@ using UnityEngine;
 
 public class SightManager : MonoBehaviour
 {
-    int wallLayer;
     public GameObject circleSightPrefab;
     public GameObject boxSightPrefab;
     public Transform playerTf;
-    Transform cameraTf;
-    List<GameObject> boxSights;
-    List<GameObject> circleSights;
-    readonly int maxCount = 25;
+    List<SightData> sight;
+    readonly int maxCount = 50;
     readonly float baseRotateAngleRad = 2.3f; //120도 정도?
-    RaycastHit2D hit;
-    readonly Vector3 baseFogStartPos = new Vector3(5, 10, 0);
+    readonly Vector3 fogStartPos = new Vector3(5, 10, 0);
     Transform parent;
 
     private void Awake()
     {
-        wallLayer = 1 << LayerMask.NameToLayer("Wall");
-        boxSights = new List<GameObject>();
-        circleSights = new List<GameObject>();
-        cameraTf = Camera.main.transform;
+        sight = new List<SightData>();
         parent = new GameObject("Sights").transform;
-        parent.SetParent(transform);
+        parent.SetParent(playerTf);
+        parent.localRotation = Quaternion.Euler(0, 0, 0);
+        parent.localPosition = Vector3.zero;
 
-        for (int i = 0; i < 20; i++)
-        {
-            AddMoreCircleSight();
-            AddMoreBoxSight();
-        }
-        StartCoroutine(FogUpdate());
+        InitSight();
     }
-    
-    IEnumerator FogUpdate()
+
+    public void RefreshSight()
     {
-        yield return new WaitForSecondsRealtime(1.0f);
-        while(true)
+        if (sight == null)
+            return;
+        for (int i = 0; i < sight.Count; i++)
         {
-            SetFog();
-            yield return new WaitForSecondsRealtime(0.02f);
+            sight[i].RefreshSight();
         }
     }
 
-    void SetFog()
+    void InitSight()
     {
-        Vector3 center = playerTf.position;
-        float angle = playerTf.eulerAngles.z;
-        Vector3[] baseFogPos = GetCurvedFogPositon(baseFogStartPos);
-        baseFogPos = RotatePosition(baseFogPos, angle);
-        for(int i = 0;i < baseFogPos.Length; i++)
-        {
-            baseFogPos[i] += center;
-        }
-        
-        for (int i = 0; i < baseFogPos.Length; i++)
-        {
-            while (i > circleSights.Count - 1)
-                AddMoreCircleSight();
-            while (i > boxSights.Count - 1)
-                AddMoreBoxSight();
+        Vector3[] fogTargetPos = GetFogTargetPos(fogStartPos);
 
-            baseFogPos[i] = GetRayHitPos(center, baseFogPos[i]);
-            PutBoxSight(center, baseFogPos[i], boxSights[i]);
-            circleSights[i].transform.position = baseFogPos[i];
+        for (int i = 0; i < fogTargetPos.Length; i++)
+        {
+            GameObject newBox = Instantiate(boxSightPrefab, parent);
+            GameObject newCircle = Instantiate(circleSightPrefab, parent);
+            SightData data = new SightData(newBox, newCircle, fogTargetPos[i]);
+            sight.Add(data);
         }
     }
-    
-    Vector3[] RotatePosition(Vector3[] pos, float degree)
-    {
-        Vector3[] result = new Vector3[pos.Length];
-        float cos = Mathf.Cos(degree * Mathf.Deg2Rad);
-        float sin = Mathf.Sin(degree * Mathf.Deg2Rad);
-        for (int i = 0; i < pos.Length; i++)
-        {
-            result[i].x = pos[i].x * cos - pos[i].y * sin;
-            result[i].y = pos[i].x * sin + pos[i].y * cos;
-            result[i].z = 0;
-        }
 
-        return result;
-    }
 
-    Vector3[] GetCurvedFogPositon(Vector3 baseLinePos)
+    Vector3[] GetFogTargetPos(Vector3 baseLinePos)
     {
         int count = maxCount;
         if (count == 0)
@@ -95,7 +60,7 @@ public class SightManager : MonoBehaviour
         result[0] = baseLinePos;
         result[result.Length - 1] = baseLinePos;
         result[result.Length - 1].y *= -1;
-        for(int i = 1; i < count * 0.5f; i++)
+        for (int i = 1; i < count * 0.5f; i++)
         {
             result[i] = new Vector3(
                 cos * result[i - 1].x - sin * result[i - 1].y,
@@ -109,56 +74,71 @@ public class SightManager : MonoBehaviour
         return result;
     }
 
-    Vector3 GetRayHitPos(Vector3 center, Vector3 target)
+}
+
+class SightData
+{
+    int wallLayer = 1 << LayerMask.NameToLayer("Wall");
+    GameObject boxSight;
+    Transform boxTf;
+    GameObject circleSight;
+    Transform circleTf;
+
+    //(0, 0)에 위치해 있을때 타겟
+    Vector3 targetPos;
+
+    public SightData(GameObject box, GameObject circle, Vector3 target)
     {
-        float distance = (target - center).magnitude;
-        hit = Physics2D.Raycast(center, target - center, distance, wallLayer);
-        if (hit.collider != null)
-        {
-            return hit.point;
-        }
+        boxSight = box;
+        circleSight = circle;
+        boxTf = box.transform;
+        circleTf = circle.transform;
+        targetPos = target;
+        boxTf.localPosition = Vector3.zero;
+        Vector3 newAngles = new Vector3(0, 0, Vector2.SignedAngle(Vector2.right, target));
+        boxTf.localEulerAngles = newAngles;
+        RefreshCirclePosition();
+    }
+
+    public void Rotate(float angle)
+    {
+        boxTf.eulerAngles = new Vector3(0, 0, angle);
+    }
+
+    public void RefreshSight()
+    {
+        RefreshBoxScale();
+        RefreshCirclePosition();
+    }
+
+    void RefreshBoxScale()
+    {
+        float cos = Mathf.Cos(boxTf.parent.eulerAngles.z * Mathf.Deg2Rad);
+        float sin = Mathf.Sin(boxTf.parent.eulerAngles.z * Mathf.Deg2Rad);
+        Vector3 rotatedTarget = new Vector3(
+            cos * targetPos.x - sin * targetPos.y,
+            sin * targetPos.x + cos * targetPos.y, 0);
+
+        RaycastHit2D hit = Physics2D.Raycast(boxTf.position, rotatedTarget,
+            targetPos.magnitude, wallLayer);
+
+        Vector3 newScale = boxTf.localScale;
+
+        if (hit.collider == null)
+            newScale.x = (rotatedTarget - boxTf.position).magnitude;
         else
-            return target;
+            newScale.x = (hit.point - (Vector2)boxTf.position).magnitude;
+        
+        boxTf.localScale = newScale;
     }
 
-    void PutBoxSight(Vector3 center, Vector3 target, GameObject go)
+    void RefreshCirclePosition()
     {
-        Vector3 scale = go.transform.localScale;
-        scale.x = (target - center).magnitude;
-        go.transform.localScale = scale;
+        float cos = Mathf.Cos(boxTf.eulerAngles.z * Mathf.Deg2Rad);
+        float sin = Mathf.Sin(boxTf.eulerAngles.z * Mathf.Deg2Rad);
+        float distance = boxTf.localScale.x;
+        Vector3 newPos = new Vector3(cos * distance, sin * distance, 0);
 
-        Vector3 rotation = Vector3.zero;
-        rotation.z = GetAngleDegree(center, target, AngleType.DEG);
-        go.transform.localEulerAngles = rotation;
-
-        go.transform.position = center;
-    }
-
-    enum AngleType { DEG, RAD}
-
-    float GetAngleDegree(Vector3 center, Vector3 target, AngleType type)
-    {
-        float result = Vector3.SignedAngle(Vector3.right, target - center, Vector3.up);
-        if ((target - center).y < 0)
-            result *= -1f;
-
-        if (type == AngleType.RAD)
-            result *= Mathf.Deg2Rad;
-
-        return result;
-    }
-
-    void AddMoreBoxSight()
-    {
-        GameObject box = Instantiate(boxSightPrefab, parent);
-        box.SetActive(true);
-        boxSights.Add(box);
-    }
-
-    void AddMoreCircleSight()
-    {
-        GameObject circle = Instantiate(circleSightPrefab, parent);
-        circle.SetActive(true);
-        circleSights.Add(circle);
+        circleTf.position = boxTf.position + newPos;
     }
 }

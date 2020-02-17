@@ -1467,7 +1467,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tsm: {fileID: 1795215649}
   player: {fileID: 230774544}
-  canMove: 1
+  canInput: 1
 --- !u!4 &1795215648
 Transform:
   m_ObjectHideFlags: 0
@@ -1492,7 +1492,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 47be57d3cde0d3d49a026bb4e29f46b3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canScale: 1
 --- !u!114 &1795215650
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1531,7 +1530,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2100425160}
   - component: {fileID: 2100425161}
-  m_Layer: 0
+  m_Layer: 5
   m_Name: SightSign
   m_TagString: Untagged
   m_Icon: {fileID: 0}

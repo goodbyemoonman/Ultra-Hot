@@ -15,19 +15,23 @@ public class MoveUnitCommand : ICommand
 
     public void Execute(GameObject obj)
     {
-        if (dir == null)
-        {
-            Debug.Log("direction missing");
-            return;
-        }
         if (space == Space.World)
-            obj.SendMessage("MoveTo", dir);
+            obj.SendMessage("MoveToWorldDir", dir);
         else
-            obj.SendMessage("MoveRelativeRotation", dir);
+            obj.SendMessage("MoveToSelfDir", dir);
+
+        dir = Vector2.zero;
     }
 
-    public void SetDirection(Vector2 dir)
-    {
-        this.dir = dir;
+    public void SetDirection(Vector2 input)
+    {   
+        //이동 명령이 들어오면 적어도 한번은 수행
+        if (input == Vector2.zero)
+            return;
+
+        this.dir = input;
     }
 }
+
+
+

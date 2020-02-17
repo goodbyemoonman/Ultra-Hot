@@ -2,89 +2,64 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TimeScaleManager : MonoBehaviour {
-    TimeState accelState = new AccelTimeState();
-    TimeState decelState = new DecelTimeState();
-    TimeState timeState;
+public enum INPUTTYPE { NONE, MOUSE, KEYBOARD }
 
-    public bool canScale = true;
-    float goal;
+public class TimeScaleManager : MonoBehaviour {
+    readonly float scaler = 0.03f;
+    bool canScale = true;
+    float target;
 
     private void Start()
     {
-        timeState = decelState;
         StartCoroutine(ControlTimeScale());
     }
 
     IEnumerator ControlTimeScale()
     {
-        while (canScale)
+        target = 0.1f;
+        int multiplier = 1;
+        while (true)
         {
-            timeState.Update(goal);
+            if (Time.timeScale > target)
+                multiplier = 2;
+            else
+                multiplier = 1;
+            if (canScale)
+            {
+                Time.timeScale = Mathf.Lerp(Time.timeScale, target, scaler * multiplier);
+            }
             yield return new WaitForSecondsRealtime(0.025f);
         }
     }
 
-    public void SetTimeScale(float to)
+    public void SetInputType(INPUTTYPE input)
     {
-        goal = to;
-        if (Time.timeScale < to)
+        switch (input)
         {
-            timeState = accelState;
+            case INPUTTYPE.NONE:
+                target = 0.1f;
+                break;
+            case INPUTTYPE.MOUSE:
+                target = 0.25f;
+                break;
+            case INPUTTYPE.KEYBOARD:
+                target = 1f;
+                break;
         }
-        else
-            timeState = decelState;
     }
 
-    public void SetTimeScale(float to, bool isEmergency)
+    public void SetTimeScaleImmediately(float to)
     {
-        if (isEmergency)
-        {
-            Time.timeScale = to;
-            return;
-        }
-        else
-            SetTimeScale(to);
+        Time.timeScale = Mathf.Clamp01(to);
+    }
+    
+    public void SetScaleSwitch(bool isTurnOn)
+    {
+        canScale = isTurnOn;
     }
 
     private void OnGUI()
     {
         GUI.Label(new Rect(0, 0, 100, 50), Time.timeScale.ToString());
-    }
-}
-
-abstract class TimeState
-{
-    protected readonly float MINTIMESCALE = 0.1f;
-
-    public abstract void Update(float goal);
-    protected float GetBig(float a, float b)
-    {
-        return (a < b) ? b : a;
-    }
-}
-
-class AccelTimeState : TimeState
-{ 
-    public override void Update(float goal)
-    {
-        Time.timeScale = Mathf.Clamp(Time.timeScale + 0.0125f, MINTIMESCALE, GetBig(goal, 1f));
-    }
-
-}
-
-class DecelTimeState : TimeState
-{
-    public override void Update(float goal)
-    {
-        Time.timeScale = Mathf.Clamp(Time.timeScale - 0.025f, GetBig(MINTIMESCALE, goal), 1f);
-    }
-}
-
-class NullTimeState : TimeState
-{
-    public override void Update(float goal)
-    {
-
     }
 }

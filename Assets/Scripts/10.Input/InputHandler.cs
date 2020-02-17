@@ -8,80 +8,65 @@ public class InputHandler : MonoBehaviour
     MoveUnitCommand moveUnitCommand = new MoveUnitCommand(Vector2.zero);
     RotateUnitCommand rotateUnitCommand = new RotateUnitCommand();
     public GameObject player;
-    public bool canMove = true;
+    public bool canInput = true;
     Vector3 preMousePos;
 
-    private void Start()
+    private void Awake()
     {
-        StartCoroutine(InputWatcher());
+        StartCoroutine(GetInput());
     }
 
-    IEnumerator InputWatcher()
+    private void Update()
     {
-        float _timeScale = 0;
+        moveUnitCommand.Execute(player);
+    }
 
-        while (canMove)
+    IEnumerator GetInput()
+    {
+        while (true)
         {
-            if (preMousePos != Input.mousePosition)
-                _timeScale = 0.2f;
-            else
-                _timeScale = 0f;
-            preMousePos = Input.mousePosition;
-            CommandToRotate(GetAngle(player.transform.position,
-            Camera.main.ScreenToWorldPoint(preMousePos)));
+            Vector2 _direction = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+            Vector3 _mousePos = Input.mousePosition;
+            TimeScaleInput(_mousePos, _direction);
+            PlayerMoveInput(_mousePos, _direction);
 
-            if (IsMove())
-            {
-                Vector2 direction = new Vector2(Input.GetAxis("Horizontal"),
-                    Input.GetAxis("Vertical"));
-                CommandToMove(direction.normalized);
-                _timeScale = 1f;
-            }
-            
-            tsm.SetTimeScale(_timeScale);
             yield return new WaitForSecondsRealtime(0.01f);
         }
     }
 
-    void CommandToMove(Vector2 dir)
+    void TimeScaleInput(Vector3 inputMousePos, Vector2 inputDir)
     {
-        moveUnitCommand.SetDirection(dir);
-        moveUnitCommand.Execute(player);
+        if (inputDir != Vector2.zero)
+            tsm.SetInputType(INPUTTYPE.KEYBOARD);
+        else if (preMousePos != inputMousePos)
+            tsm.SetInputType(INPUTTYPE.MOUSE);
+        else
+            tsm.SetInputType(INPUTTYPE.NONE);
+
+        preMousePos = Input.mousePosition;
+    }
+
+    void PlayerMoveInput(Vector3 inputMousePos, Vector2 inputDir)
+    {
+        if (canInput == false)
+            return;
+
+        moveUnitCommand.SetDirection(inputDir);
+
+        CommandToRotate(
+            GetAngle(player.transform.position, 
+            Camera.main.ScreenToWorldPoint(inputMousePos)));
     }
 
     void CommandToRotate(float angle)
     {
         rotateUnitCommand.Initialize(angle);
         rotateUnitCommand.Execute(player);
-    }
-
-    bool IsInputEmpty()
-    {
-        if (Input.GetKey(KeyCode.W))
-            return false;
-        if (Input.GetKey(KeyCode.A))
-            return false;
-        if (Input.GetKey(KeyCode.S))
-            return false;
-        if (Input.GetKey(KeyCode.D))
-            return false;
-
-        if (Input.mousePosition != preMousePos)
-            return false;
-
-        return true;
-    }
-
-    bool IsMove()
-    {
-        return Mathf.Abs(Input.GetAxis("Horizontal")) + Mathf.Abs(Input.GetAxis("Vertical")) != 0;
+        SendMessage("RefreshSight");
     }
 
     float GetAngle(Vector2 objPos, Vector2 cursor)
     {
-        cursor -= objPos;
-        cursor.Normalize();
-
-        return Mathf.Atan2(cursor.y, cursor.x) * Mathf.Rad2Deg;
+        return Vector2.SignedAngle(Vector2.right, cursor - objPos);
     }
 }
