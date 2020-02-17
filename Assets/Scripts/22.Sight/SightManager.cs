@@ -46,7 +46,7 @@ public class SightManager : MonoBehaviour
         while(true)
         {
             SetFog();
-            yield return new WaitForSecondsRealtime(0.05f);
+            yield return new WaitForSecondsRealtime(0.02f);
         }
     }
 
