@@ -5,32 +5,32 @@ using UnityEngine;
 public class SightManager : MonoBehaviour
 {
     int wallLayer;
-    public GameObject sightPrefab;
+    public GameObject circleSightPrefab;
+    public GameObject boxSightPrefab;
     public Transform playerTf;
-    public Transform cameraTf;
-    List<GameObject> deadSight;
-    List<GameObject> liveSight;
-    readonly int maxWidth = 10;
-    readonly int maxX = 6;
-    readonly int maxY = 12;
-    readonly int maxSight = 12;
-    readonly int maxHeight = 6;
-    readonly float rotateAngleRad = 1.107f;     //63도 정도?
+    Transform cameraTf;
+    List<GameObject> boxSights;
+    List<GameObject> circleSights;
+    readonly int maxCount = 25;
     readonly float baseRotateAngleRad = 2.3f; //120도 정도?
     RaycastHit2D hit;
+    readonly Vector3 baseFogStartPos = new Vector3(5, 10, 0);
+    Transform parent;
 
     private void Awake()
     {
         GetComponent<GameManager>().GameStateObserver += GameStateObserve;
         wallLayer = 1 << LayerMask.NameToLayer("Wall");
-        deadSight = new List<GameObject>();
-        liveSight = new List<GameObject>();
+        boxSights = new List<GameObject>();
+        circleSights = new List<GameObject>();
         cameraTf = Camera.main.transform;
-        for (int i = 0; i < maxWidth * maxHeight; i++)
+        parent = new GameObject("Sights").transform;
+        parent.SetParent(transform);
+
+        for (int i = 0; i < 20; i++)
         {
-            GameObject go = Instantiate(sightPrefab, transform);
-            go.SetActive(false);
-            deadSight.Add(go);
+            AddMoreCircleSight();
+            AddMoreBoxSight();
         }
     }
 
@@ -42,6 +42,7 @@ public class SightManager : MonoBehaviour
     
     IEnumerator FogUpdate()
     {
+        yield return new WaitForSecondsRealtime(1.0f);
         while(true)
         {
             SetFog();
@@ -53,61 +54,26 @@ public class SightManager : MonoBehaviour
     {
         Vector3 center = playerTf.position;
         float angle = playerTf.eulerAngles.z;
-        //(0, 0)을 중심으로 베이스 라인 그리기
-        Vector3[] basePos = GetBaseLinePositions();
-        //베이스라인 회전시키면서 시야 그리기.
-        Vector3[] fogpos = new Vector3[0];
-        for(int i = 0; i < basePos.Length; i++)
+        Vector3[] baseFogPos = GetCurvedFogPositon(baseFogStartPos);
+        baseFogPos = RotatePosition(baseFogPos, angle);
+        for(int i = 0;i < baseFogPos.Length; i++)
         {
-            //현재 점과 캐릭터 사이의 거리를 반지름(half diameter)이라 했을 때
-            //시야각만큼 회전시 나온 distance를 갖고 
-            //distance의 0.5 마다 시야를 하나씩 배치
-            fogpos = ArrayAppend(
-                fogpos,
-                GetCurvedFogPositon(
-                    GetDistance(GetDiameter(basePos[i])), 
-                    basePos[i]));
+            baseFogPos[i] += center;
         }
-        //만들어진 시야 캐릭터의 방향에 맞게 회전
-        fogpos = RotatePosition(fogpos, angle);
-        //시야 잘라내기
-        int count = 0;
-        for (int i = 0; i < fogpos.Length; i++)
+        
+        for (int i = 0; i < baseFogPos.Length; i++)
         {
-            fogpos[i] += center;
-            
-            if (IsOnScreen(fogpos[i]) && !IsFogByWall(center, fogpos[i]))
-            {
-                while (count > liveSight.Count - 1)
-                    TurnSightOn();
-                liveSight[count].transform.position = fogpos[i];
-                count++;
-            }
-        }
+            while (i > circleSights.Count - 1)
+                AddMoreCircleSight();
+            while (i > boxSights.Count - 1)
+                AddMoreBoxSight();
 
-        if(count < liveSight.Count)
-        {
-            TurnSightOff(liveSight.Count - count);
+            baseFogPos[i] = GetRayHitPos(center, baseFogPos[i]);
+            PutBoxSight(center, baseFogPos[i], boxSights[i]);
+            circleSights[i].transform.position = baseFogPos[i];
         }
-
     }
-
-    Vector3[] GetBaseLinePositions()
-    {
-        //this function will return Vector in y = 2x 
-        // 0.25 <= x <= 6  // 0 <= y <= 12 // number of result = 12 * 4 + 1;
-        // x가 6일때의 길이와 시야의 길이가 맵에서 가장 길 때의 길이가 같음.
-        int maxNum = maxSight * 3 + 1;
-        Vector3[] result = new Vector3[maxNum];
-        float x = 0.33f;
-        for (int i = 0; i < maxNum; i++)
-        {
-            result[i] = new Vector3(x, 2 * x, 0);
-            x += (maxX - 0.033f) / (maxNum);
-        }
-        return result;
-    }
-
+    
     Vector3[] RotatePosition(Vector3[] pos, float degree)
     {
         Vector3[] result = new Vector3[pos.Length];
@@ -123,74 +89,9 @@ public class SightManager : MonoBehaviour
         return result;
     }
 
-    Vector3[] ArrayAppend(Vector3[] left, Vector3[] right)
+    Vector3[] GetCurvedFogPositon(Vector3 baseLinePos)
     {
-        Vector3[] result = new Vector3[left.Length + right.Length];
-        left.CopyTo(result, 0);
-        right.CopyTo(result, left.Length);
-        return result;
-    }
-
-    bool IsOnScreen(Vector3 pos)
-    {
-        if (Mathf.Abs(pos.x - cameraTf.position.x) > maxWidth)
-            return false;
-        if (Mathf.Abs(pos.y - cameraTf.position.y) > maxHeight)
-            return false;
-
-        return true;
-    }
-
-    void TurnSightOn()
-    {
-        if (deadSight.Count != 0)
-        {
-            liveSight.Add(deadSight[deadSight.Count - 1]);
-            liveSight[liveSight.Count - 1].SetActive(true);
-            deadSight.RemoveAt(deadSight.Count - 1);
-        }
-        else
-        {
-            liveSight.Add(Instantiate(sightPrefab, transform));
-            liveSight[liveSight.Count - 1].SetActive(true);
-        }
-    }
-
-    void TurnSightOff(int count)
-    {
-        for(int i = 0;i < count; i++)
-        {
-            liveSight[liveSight.Count - 1].SetActive(false);
-            deadSight.Add(liveSight[liveSight.Count - 1]);
-            liveSight.RemoveAt(liveSight.Count - 1);
-        }
-    }
-
-    bool IsFogByWall(Vector3 pos, Vector3 pos2)
-    {
-        float lv = (pos2 - pos).x;
-        float rv = (pos2 - pos).y;
-        float distance = Mathf.Sqrt(lv * lv + rv * rv);
-        hit = Physics2D.Raycast(pos, pos2 - pos, distance, wallLayer);
-        if (hit.collider == null)
-            return false;
-        else
-            return true;
-    }
-
-    float GetDiameter(Vector2 pos)
-    {
-        return (pos.x * Mathf.Cos(-rotateAngleRad) - pos.y * Mathf.Sin(-rotateAngleRad)) * 2f;
-    }
-
-    float GetDistance(float diameter)
-    {
-        return diameter * Mathf.PI * (2 * Mathf.PI / baseRotateAngleRad);
-    }
-
-    Vector3[] GetCurvedFogPositon(float distance, Vector3 baseLinePos)
-    {
-        int count = CountFogPositionOnCurve(distance);
+        int count = maxCount;
         if (count == 0)
             return null;
         float rotateAngle = baseRotateAngleRad / count;
@@ -214,8 +115,56 @@ public class SightManager : MonoBehaviour
         return result;
     }
 
-    int CountFogPositionOnCurve(float distance)
+    Vector3 GetRayHitPos(Vector3 center, Vector3 target)
     {
-        return Mathf.CeilToInt(distance * 2f);
+        float distance = (target - center).magnitude;
+        hit = Physics2D.Raycast(center, target - center, distance, wallLayer);
+        if (hit.collider != null)
+        {
+            return hit.point;
+        }
+        else
+            return target;
+    }
+
+    void PutBoxSight(Vector3 center, Vector3 target, GameObject go)
+    {
+        Vector3 scale = go.transform.localScale;
+        scale.x = (target - center).magnitude;
+        go.transform.localScale = scale;
+
+        Vector3 rotation = Vector3.zero;
+        rotation.z = GetAngleDegree(center, target, AngleType.DEG);
+        go.transform.localEulerAngles = rotation;
+
+        go.transform.position = center;
+    }
+
+    enum AngleType { DEG, RAD}
+
+    float GetAngleDegree(Vector3 center, Vector3 target, AngleType type)
+    {
+        float result = Vector3.SignedAngle(Vector3.right, target - center, Vector3.up);
+        if ((target - center).y < 0)
+            result *= -1f;
+
+        if (type == AngleType.RAD)
+            result *= Mathf.Deg2Rad;
+
+        return result;
+    }
+
+    void AddMoreBoxSight()
+    {
+        GameObject box = Instantiate(boxSightPrefab, parent);
+        box.SetActive(true);
+        boxSights.Add(box);
+    }
+
+    void AddMoreCircleSight()
+    {
+        GameObject circle = Instantiate(circleSightPrefab, parent);
+        circle.SetActive(true);
+        circleSights.Add(circle);
     }
 }
