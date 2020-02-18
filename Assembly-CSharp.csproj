@@ -76,7 +76,11 @@
     <Compile Include="Assets\Scripts\21.Map\MapDataSource.cs" />
     <Compile Include="Assets\Scripts\21.Map\TestScript.cs" />
     <Compile Include="Assets\Scripts\21.Map\WorldMaker.cs" />
-    <Compile Include="Assets\Scripts\22.Combat\PunchMove.cs" />
+    <Compile Include="Assets\Scripts\22.Combat\AttackBase.cs" />
+    <Compile Include="Assets\Scripts\22.Combat\PistolAttack.cs" />
+    <Compile Include="Assets\Scripts\22.Combat\PlayerPunchAttack.cs" />
+    <Compile Include="Assets\Scripts\23.Movement\BulletMove.cs" />
+    <Compile Include="Assets\Scripts\23.Movement\PunchMove.cs" />
     <None Include="Assets\Resources\MapData\S1.xml" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>Z:/testGame/ProjectSH/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>

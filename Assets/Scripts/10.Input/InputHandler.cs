@@ -30,7 +30,7 @@ public class InputHandler : MonoBehaviour
             TimeScaleInput(_mousePos, _direction);
             PlayerMoveInput(_mousePos, _direction);
             if (Input.GetMouseButtonDown(0))
-                player.SendMessage("Punch");
+                player.SendMessage("LeftClick");
 
             yield return new WaitForSecondsRealtime(0.01f);
         }

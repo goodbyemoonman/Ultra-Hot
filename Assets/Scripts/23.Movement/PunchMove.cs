@@ -36,10 +36,19 @@ public class PunchMove : MonoBehaviour {
         tr.Clear();
         Vector2 origin = transform.position;
         Vector2 target = Vector2.right;
-        for(float t = 0; t < 0.1f; t+= 0.02f)
+        for(float t = 0; t < 0.1f; )
         {
             transform.localPosition = Vector2.Lerp(originPos , target, t * 10);
-            yield return new WaitForSecondsRealtime(0.02f);
+            if (isPlayer)
+            {
+                t += 0.02f;
+                yield return new WaitForSecondsRealtime(0.02f);
+            }
+            else
+            {
+                t += Time.deltaTime;
+                yield return null;
+            }
         }
 
         hits = Physics2D.RaycastAll(origin, ((Vector2)transform.position - origin),
