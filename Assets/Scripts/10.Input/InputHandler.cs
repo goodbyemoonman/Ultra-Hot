@@ -29,6 +29,8 @@ public class InputHandler : MonoBehaviour
             Vector3 _mousePos = Input.mousePosition;
             TimeScaleInput(_mousePos, _direction);
             PlayerMoveInput(_mousePos, _direction);
+            if (Input.GetMouseButtonDown(0))
+                player.SendMessage("Punch");
 
             yield return new WaitForSecondsRealtime(0.01f);
         }
