@@ -64,6 +64,9 @@
     <Compile Include="Assets\Scripts\00.Command\ICommand.cs" />
     <Compile Include="Assets\Scripts\00.Command\MoveUnitCommand.cs" />
     <Compile Include="Assets\Scripts\00.Command\RotateUnitCommand.cs" />
+    <Compile Include="Assets\Scripts\01.Manager\ObjPoolData.cs" />
+    <Compile Include="Assets\Scripts\01.Manager\ObjPoolManager.cs" />
+    <Compile Include="Assets\Scripts\01.Manager\ObjPoolRWHelper.cs" />
     <Compile Include="Assets\Scripts\01.Manager\SightManager.cs" />
     <Compile Include="Assets\Scripts\01.Manager\TimeScaleManager.cs" />
     <Compile Include="Assets\Scripts\10.Input\InputHandler.cs" />
@@ -81,7 +84,12 @@
     <Compile Include="Assets\Scripts\22.Combat\PlayerPunchAttack.cs" />
     <Compile Include="Assets\Scripts\23.Movement\BulletMove.cs" />
     <Compile Include="Assets\Scripts\23.Movement\PunchMove.cs" />
+    <Compile Include="Assets\Scripts\24.Effect\BloodEffectCallback.cs" />
+    <Compile Include="Assets\Scripts\EnumLists\ObjectPoolList.cs" />
+    <Compile Include="Assets\Scripts\Utility\Singleton.cs" />
+    <None Include="Assets\Resources\ObjectPoolData\ObjectPoolData.xml" />
     <None Include="Assets\Resources\MapData\S1.xml" />
+    <None Include="Assets\Template\EnumTemplate.txt" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>Z:/testGame/ProjectSH/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
     </Reference>

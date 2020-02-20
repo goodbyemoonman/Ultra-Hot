@@ -3,18 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class BulletMove : MonoBehaviour {
+    TrailRenderer tr;
     readonly int dmg = 3;
     readonly int speed = 6;
     readonly float deadSpeed = 0.2f;
     bool isCrashed = false;
     float t = 0;
+    
     private void OnEnable()
     {
+        t = 0;
+        tr = GetComponent<TrailRenderer>();
         isCrashed = false;
+        tr.Clear();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log(collision.name);
         if (isCrashed)
             return;
         isCrashed = true;
@@ -34,6 +40,6 @@ public class BulletMove : MonoBehaviour {
         }
 
         if (t > 1)
-            gameObject.SetActive(false);
+            ObjPoolManager.Instance.ReturnObject(gameObject);
     }
 }

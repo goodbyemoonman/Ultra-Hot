@@ -6,114 +6,12 @@ using System.Xml.Serialization;
 using System.IO;
 
 public class MapDataManager : ScriptableObject {
-    enum TYPE { WALLS, ENEMYSPAWNS }
-    const string MAP = "map";
-    const string NAME = "name";
-    const string SIZE = "size";
-    const string WALLS = "walls";
-    const string ENEMYSPAWNS = "enemySpawns";
-    const string PLAYERSPAWN = "playerSpawn";
-    const string VECTOR2 = "vector2";
+    public MapDataSource source;
 
-    public MapDataSource source = new MapDataSource();
-
-    #region do not use this code anymore
-    /*
-    public void SaveMapData(string mapPath)
+    private void OnEnable()
     {
-        string[] tmpStr = mapPath.Split('/');
-        SetMapName(tmpStr[tmpStr.Length - 1].Substring(0, tmpStr[tmpStr.Length - 1].Length - ".xml".Length));
-
-        XmlWriterSettings settings = new XmlWriterSettings();
-        settings.Encoding = System.Text.Encoding.Unicode;
-        using (XmlWriter writer = XmlWriter.Create(mapPath, settings))
-        {
-            writer.WriteStartDocument();
-            writer.WriteStartElement(MAP);
-            {
-                writer.WriteElementString(NAME, source.mapName);
-                writer.WriteElementString(SIZE, source.mapSize.ToString());
-                writer.WriteElementString(PLAYERSPAWN, source.playerSpawn.ToString());
-                writer.WriteStartElement(WALLS);
-                {
-                    for (int i = 0; i < source.walls.Count; i++)
-                    {
-                        writer.WriteElementString(VECTOR2, source.walls[i].ToString());
-                    }
-                }
-                writer.WriteEndElement();
-
-                writer.WriteStartElement(ENEMYSPAWNS);
-                {
-                    for (int i = 0; i < source.enemySpawns.Count; i++)
-                    {
-                        writer.WriteElementString(VECTOR2, source.enemySpawns[i].ToString());
-                    }
-                }
-                writer.WriteEndElement();
-            }
-            writer.WriteEndElement();
-            writer.WriteEndDocument();
-        }
+        source = new MapDataSource();
     }
-
-    public void LoadMapData(string mapPath)
-    {
-        string[] tmpStr = mapPath.Split('.');
-        tmpStr = tmpStr[0].Split('/');
-        string newPath = tmpStr[0];
-        for (int i = 1; i < tmpStr.Length; i++)
-
-        {
-            if (tmpStr[i] == "Resources")
-                newPath = "";
-            else
-                newPath = Path.Combine(newPath, tmpStr[i]);
-        }
-        Debug.Log("Load Path >> " + newPath);
-        TextAsset textAsset = Resources.Load<TextAsset>(newPath);
-        Debug.Log("textAsset text >> " + textAsset.text);
-        if (textAsset == null || textAsset.text == "")
-            return;
-
-        source.Clear();
-        using (XmlReader reader = XmlReader.Create(new StringReader(textAsset.text)))
-        {
-            TYPE t = TYPE.WALLS;
-
-            while (reader.Read())
-            {
-                if (reader.IsStartElement())
-                {
-                    switch (reader.Name)
-                    {
-                        case SIZE:
-                            SetMapSize(Str2Vec2(reader.ReadString()));
-                            break;
-                        case NAME:
-                            SetMapName(reader.ReadString());
-                            break;
-                        case PLAYERSPAWN:
-                            SetPlayerSpawn(Str2Vec2(reader.ReadString()));
-                            break;
-                        case WALLS:
-                            t = TYPE.WALLS;
-                            break;
-                        case ENEMYSPAWNS:
-                            t = TYPE.ENEMYSPAWNS;
-                            break;
-                        case VECTOR2:
-                            if (t == TYPE.WALLS)
-                                SetWall(Str2Vec2(reader.ReadString()));
-                            else
-                                SetEnemySpawn(Str2Vec2(reader.ReadString()));
-                            break;
-                    }
-                }
-            }
-        }
-    }*/
-    #endregion
 
     public void SaveMapData(string mapPath)
     {
@@ -121,17 +19,30 @@ public class MapDataManager : ScriptableObject {
         {
             XmlSerializer xs = new XmlSerializer(typeof(MapDataSource));
             xs.Serialize(sw, source);
-            Debug.Log(sw.ToString());
         }
     }
 
     public void LoadMapData(string mapPath)
     {
-        using (StreamReader sr = new StreamReader(mapPath))
+        string[] tmp = mapPath.Split('/');
+        string path = "";
+        for (int i = 0; i < tmp.Length; i++)
         {
-            XmlSerializer xs = new XmlSerializer(typeof(MapDataSource));
-            source = xs.Deserialize(sr) as MapDataSource;
+            if (tmp[i] == "Resources")
+                path = "";
+            else
+                path = Path.Combine(path, tmp[i]);
         }
+
+        if (path.Contains(".xml"))
+            path = path.Remove(path.Length - ".xml".Length);
+
+        TextAsset ta = Resources.Load<TextAsset>(path);
+        StringReader sr = new StringReader(ta.text);
+        
+        XmlSerializer x = new XmlSerializer(typeof(MapDataSource));
+        source = x.Deserialize(sr) as MapDataSource;
+        
     }
 
     public Vector2Int Str2Vec2(string str)

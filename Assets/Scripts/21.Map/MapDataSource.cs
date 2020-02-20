@@ -3,19 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class MapDataSource : ScriptableObject{
+public class MapDataSource {
     public Vector2Int mapSize;
     public string mapName;
-    public List<Vector2Int> walls = new List<Vector2Int>();
-    public List<Vector2Int> enemySpawns = new List<Vector2Int>();
+    public List<Vector2Int> walls;
+    public List<Vector2Int> enemySpawns;
     public Vector2Int playerSpawn;
+
+    private void OnEnable()
+    {
+        walls = new List<Vector2Int>();
+        enemySpawns = new List<Vector2Int>();
+    }
 
     public void Clear()
     {
+        walls = new List<Vector2Int>();
+        enemySpawns = new List<Vector2Int>();
         mapSize = Vector2Int.one;
-        mapName = "New Map";
-        walls.Clear();
-        enemySpawns.Clear();
+        mapName = "NewMap";
         playerSpawn = Vector2Int.zero;
     }
 }

@@ -27,4 +27,9 @@ public class AtkHandler : MonoBehaviour {
         equipment.SendMessage("ThrowThisObj");
         equipment = null;
     }
+
+    public void UnEquip()
+    {
+        equipment = null;
+    }
 }

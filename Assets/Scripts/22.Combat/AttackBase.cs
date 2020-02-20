@@ -14,7 +14,8 @@ public abstract class AttackBase : MonoBehaviour {
             return;
         }
         isCooldown = true;
-        Invoke("RefreshCooldown", cooltime);
+        StopAllCoroutines();
+        StartCoroutine(Timer(cooltime));
 
         Execute();
     }
@@ -27,4 +28,10 @@ public abstract class AttackBase : MonoBehaviour {
     }
 
     public abstract void ThrowThisObj();
+
+    IEnumerator Timer(float duration)
+    {
+        yield return new WaitForSecondsRealtime(duration);
+        RefreshCooldown();
+    }
 }

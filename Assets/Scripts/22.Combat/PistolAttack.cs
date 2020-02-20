@@ -41,6 +41,11 @@ public class PistolAttack : AttackBase {
 
         bulletCount--;
 
-        GameObject bullet = Instantiate(bulletPrefab, firePos.position, Quaternion.Euler(transform.eulerAngles));
+        GameObject bullet = ObjPoolManager.Instance.GetObject(ObjectPoolList.BulletPrefab);
+        bullet.transform.SetPositionAndRotation(
+            firePos.position, 
+            Quaternion.Euler(transform.eulerAngles));
+        bullet.transform.SetParent(null);
+        bullet.SetActive(true);
     }
 }

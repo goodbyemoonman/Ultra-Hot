@@ -10,6 +10,7 @@ public class MapEditor : EditorWindow
     Vector2Int tmpSom;
     Vector2 scrollPos;
     Rect[,] rects;
+    Rect preMouseRect;
 
     readonly float boxSize = 25;
     readonly Vector2 scrollStartPos = new Vector2(30, 60);
@@ -54,12 +55,9 @@ public class MapEditor : EditorWindow
         EditorGUILayout.EndHorizontal();
 
         DrawMap();
-        DrawMouseOverlapBox();
-        
 
         if (Event.current.type == EventType.MouseDown)
         {
-            Debug.Log(GetCoordWithPosition(Event.current.mousePosition));
             ClickEvent(GetCoordWithPosition(Event.current.mousePosition));
         }
 
@@ -162,37 +160,6 @@ public class MapEditor : EditorWindow
         }
         GUI.EndScrollView();
     }
-
-    void DrawMouseOverlapBox()
-    {
-        Color c = colors[(int)brushNow];
-        c.a = 0.5f;
-        if (rects == null)
-            return;
-        IEnumerator<Rect> enumerator = 
-            GetRectsInRect(rects, new Rect(gridStartPos, scrollArea)).GetEnumerator();
-        while (enumerator.MoveNext())
-        {
-            DrawColorBox(enumerator.Current, GUIContent.none, c);
-        }
-    }
-    
-    IEnumerable<Rect> GetRectsInRect(Rect[,] rectsPool, Rect targetRect)
-    {
-        foreach (Rect r in rectsPool)
-        {
-            Rect newR = r;
-            newR.position -= scrollPos;
-            newR.position += scrollStartPos;
-            if (targetRect.Overlaps(newR))
-            {
-                if (newR.Contains(Event.current.mousePosition))
-                {
-                    yield return newR;
-                }
-            }
-        }
-    }
     
     Vector2Int GetCoordWithPosition(Vector2 pos)
     {
@@ -234,21 +201,18 @@ public class MapEditor : EditorWindow
     void SetWall(Vector2Int pos)
     {
         data.SetWall(pos);
-        Debug.Log(pos + " Set Wall. ");
         return;
     }
 
     void SetEnemySpawn(Vector2Int pos)
     {
         data.SetEnemySpawn(pos);
-        Debug.Log(pos + " Set Enemy Spawn. ");
 
     }
 
     void SetPlayerSpawn(Vector2Int pos)
     {
         data.SetPlayerSpawn(pos);            
-        Debug.Log(pos + " Set Player Spawn. ");
     }
 
     void ClickEvent(Vector2Int pos)
@@ -265,6 +229,8 @@ public class MapEditor : EditorWindow
                 SetPlayerSpawn(pos);
                 break;
         }
+        
+        this.Repaint();
     }
 
 }
