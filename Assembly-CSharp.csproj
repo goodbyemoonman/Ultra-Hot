@@ -86,6 +86,8 @@
     <Compile Include="Assets\Scripts\23.Movement\PunchMove.cs" />
     <Compile Include="Assets\Scripts\24.Effect\BloodEffectCallback.cs" />
     <Compile Include="Assets\Scripts\EnumLists\ObjectPoolList.cs" />
+    <Compile Include="Assets\Scripts\Equipment\EquipHolder.cs" />
+    <Compile Include="Assets\Scripts\Equipment\Equipment.cs" />
     <Compile Include="Assets\Scripts\Utility\Singleton.cs" />
     <None Include="Assets\Resources\ObjectPoolData\ObjectPoolData.xml" />
     <None Include="Assets\Resources\MapData\S1.xml" />

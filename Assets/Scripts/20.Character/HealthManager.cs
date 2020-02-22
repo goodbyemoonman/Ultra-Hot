@@ -15,7 +15,9 @@ public class HealthManager : MonoBehaviour {
     {
         Debug.Log(gameObject.name + " get Damaged " + damage + " points");
         hp -= damage;
-
+        GameObject effect = ObjPoolManager.Instance.GetObject(ObjectPoolList.BloodEffect);
+        effect.transform.position = transform.position;
+        effect.SetActive(true);
         if(hp < 1)
         {
             //죽음의 처리.

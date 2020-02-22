@@ -6,6 +6,7 @@ public abstract class AttackBase : MonoBehaviour {
     protected float cooltime = 1;
     protected float range = 1;
     bool isCooldown = false;
+    protected int targetLayer;
 
     public virtual void TryExecute()
     {
@@ -33,5 +34,10 @@ public abstract class AttackBase : MonoBehaviour {
     {
         yield return new WaitForSecondsRealtime(duration);
         RefreshCooldown();
+    }
+    
+    public void SetTargetLayer(int layer)
+    {
+        targetLayer = layer;
     }
 }

@@ -7,5 +7,11 @@
       <count>10</count>
       <prefabPath>Prefab\BulletPrefab</prefabPath>
     </ObjPoolSource>
+    <ObjPoolSource>
+      <name />
+      <hideFlags>None</hideFlags>
+      <count>10</count>
+      <prefabPath>Prefab\BloodEffect</prefabPath>
+    </ObjPoolSource>
   </sources>
 </ObjPool>

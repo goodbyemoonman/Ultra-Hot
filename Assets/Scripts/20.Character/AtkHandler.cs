@@ -4,32 +4,27 @@ using UnityEngine;
 
 public class AtkHandler : MonoBehaviour {
     AttackBase punch;
-    public GameObject equipment;
+    EquipHolder holder;
 
     private void Awake()
     {
+        holder = GetComponent<EquipHolder>();
         punch = GetComponent<AttackBase>();
     }
 
     public void LeftClick()
     {
-        if (equipment == null)
-            punch.TryExecute();
+        if (holder.IsEquipSomethig())
+            holder.TryExecute();
         else
-            equipment.SendMessage("TryExecute");
+            punch.TryExecute();
     }
 
     public void RightClick()
     {
-        if (equipment == null)
+        if (!holder.IsEquipSomethig())
             return;
 
-        equipment.SendMessage("ThrowThisObj");
-        equipment = null;
-    }
-
-    public void UnEquip()
-    {
-        equipment = null;
+        holder.Throw();
     }
 }
