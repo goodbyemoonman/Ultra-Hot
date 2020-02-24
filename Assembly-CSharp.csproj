@@ -75,13 +75,14 @@
     <Compile Include="Assets\Scripts\20.Character\Follow.cs" />
     <Compile Include="Assets\Scripts\20.Character\HealthManager.cs" />
     <Compile Include="Assets\Scripts\20.Character\MoveHandler.cs" />
+    <Compile Include="Assets\Scripts\20.Character\PlayerHealthManager.cs" />
     <Compile Include="Assets\Scripts\21.Map\MapDataManager.cs" />
     <Compile Include="Assets\Scripts\21.Map\MapDataSource.cs" />
     <Compile Include="Assets\Scripts\21.Map\TestScript.cs" />
     <Compile Include="Assets\Scripts\21.Map\WorldMaker.cs" />
     <Compile Include="Assets\Scripts\22.Combat\AttackBase.cs" />
     <Compile Include="Assets\Scripts\22.Combat\PistolAttack.cs" />
-    <Compile Include="Assets\Scripts\22.Combat\PlayerPunchAttack.cs" />
+    <Compile Include="Assets\Scripts\22.Combat\PunchAttack.cs" />
     <Compile Include="Assets\Scripts\23.Movement\BulletMove.cs" />
     <Compile Include="Assets\Scripts\23.Movement\PunchMove.cs" />
     <Compile Include="Assets\Scripts\24.Effect\BloodEffectCallback.cs" />

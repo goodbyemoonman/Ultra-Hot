@@ -8,8 +8,7 @@ public class DumbAI : MonoBehaviour {
 
     private void Awake()
     {
-        moveCommand = new MoveUnitCommand(Vector2.right, Space.Self);
-        rotateCommand = new RotateUnitCommand();
+        SendMessage("EKeyDown");
     }
 
 

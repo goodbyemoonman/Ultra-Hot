@@ -7,9 +7,12 @@ public class EquipHolder : MonoBehaviour {
     RaycastHit2D[] hits;
     int targetLayer;
     GameObject equipment;
+    public Transform equipPos;
+    FixedJoint2D fxjt2d;
 
     private void Awake()
     {
+        fxjt2d = GetComponent<FixedJoint2D>();
         targetLayer = 1 << LayerMask.NameToLayer("EquipItem");
         boundary = 1.5f;
     }
@@ -42,8 +45,9 @@ public class EquipHolder : MonoBehaviour {
 
         if (equipCandidate == null)
             return;
-
-        equipCandidate.SendMessage("EquipTo", gameObject);
+        fxjt2d.enabled = true;
+        fxjt2d.connectedBody = equipCandidate.GetComponent<Rigidbody2D>();
+        equipCandidate.SendMessage("EquipTo", equipPos);
         equipment = equipCandidate;
     }
 
@@ -64,20 +68,29 @@ public class EquipHolder : MonoBehaviour {
         return result;
     }
 
-    public void TryExecute()
+    public void TryAttack()
     {
         equipment.SendMessage("TryExecute");
     }
 
     public void Throw()
     {
+        if (equipment == null)
+            return;
+        fxjt2d.connectedBody = null;
+        fxjt2d.enabled = false;
         equipment.SendMessage("ThrowThisObj");
         equipment = null;
     }
 
     public void Drop()
     {
+        if (equipment == null)
+            return;
+        fxjt2d.connectedBody = null;
+        fxjt2d.enabled = false;
         equipment.SendMessage("Drop");
+        equipment = null;
     }
 
     float GetDistance(Transform tf)

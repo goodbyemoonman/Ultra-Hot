@@ -17,8 +17,7 @@ public class PunchMove : MonoBehaviour {
             target = "EnemyCharacter";
         else
             target = "PlayerCharacter";
-        targetLayer = (1 << LayerMask.NameToLayer("Wall")) |
-            (1 << LayerMask.NameToLayer(target));
+        targetLayer = (1 << LayerMask.NameToLayer(target));
         tr = GetComponent<TrailRenderer>();
         parent = transform.parent;
         originPos = transform.localPosition;
@@ -57,9 +56,6 @@ public class PunchMove : MonoBehaviour {
 
         foreach(RaycastHit2D hit in hits)
         {
-            if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Wall"))
-                continue;
-
             hit.collider.SendMessage("GetDamaged", 1);
         }
 
