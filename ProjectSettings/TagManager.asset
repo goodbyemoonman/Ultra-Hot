@@ -15,13 +15,13 @@ TagManager:
   - 
   - 
   - Wall
-  - Character
+  - EnemyCharacter
   - Bullet
   - Sight
-  - 
-  - 
-  - 
-  - 
+  - EnemyMelee
+  - PlayerMelee
+  - PlayerCharacter
+  - EquipItem
   - 
   - 
   - 
@@ -50,6 +50,9 @@ TagManager:
     locked: 0
   - name: Character
     uniqueID: 1604540209
+    locked: 0
+  - name: Effect
+    uniqueID: 2953049355
     locked: 0
   - name: Obstacle
     uniqueID: 172934719

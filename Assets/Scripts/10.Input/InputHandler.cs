@@ -11,27 +11,25 @@ public class InputHandler : MonoBehaviour
     public bool canInput = true;
     Vector3 preMousePos;
 
-    private void Awake()
-    {
-        StartCoroutine(GetInput());
-    }
-
     private void Update()
     {
-        moveUnitCommand.Execute(player);
-    }
+        Vector2 _direction = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        Vector3 _mousePos = Input.mousePosition;
+        TimeScaleInput(_mousePos, _direction);
+        PlayerMoveInput(_mousePos, _direction);
 
-    IEnumerator GetInput()
-    {
-        while (true)
+        if (Input.GetMouseButtonDown(0))
+            player.SendMessage("LeftClick");
+
+        if (Input.GetMouseButtonDown(1))
+            player.SendMessage("RightClick");
+
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            Vector2 _direction = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-            Vector3 _mousePos = Input.mousePosition;
-            TimeScaleInput(_mousePos, _direction);
-            PlayerMoveInput(_mousePos, _direction);
-
-            yield return new WaitForSecondsRealtime(0.01f);
+            player.SendMessage("EKeyDown");
         }
+        
+        moveUnitCommand.Execute(player);
     }
 
     void TimeScaleInput(Vector3 inputMousePos, Vector2 inputDir)

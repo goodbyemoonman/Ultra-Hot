@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ObjPool xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <sources>
+    <ObjPoolSource>
+      <name />
+      <hideFlags>None</hideFlags>
+      <count>10</count>
+      <prefabPath>Prefab\BulletPrefab</prefabPath>
+    </ObjPoolSource>
+    <ObjPoolSource>
+      <name />
+      <hideFlags>None</hideFlags>
+      <count>10</count>
+      <prefabPath>Prefab\BloodEffect</prefabPath>
+    </ObjPoolSource>
+  </sources>
+</ObjPool>

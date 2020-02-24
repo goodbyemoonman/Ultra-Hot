@@ -58,6 +58,19 @@ public class TimeScaleManager : MonoBehaviour {
         canScale = isTurnOn;
     }
 
+    public void FixTimeScale(float scale, float duration)
+    {
+        Time.timeScale = scale;
+        canScale = false;
+
+        Invoke("TurnOnScale", duration);
+    }
+
+    void TurnOnScale()
+    {
+        canScale = true;
+    }
+
     private void OnGUI()
     {
         GUI.Label(new Rect(0, 0, 100, 50), Time.timeScale.ToString());

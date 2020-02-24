@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using UnityEngine.UI;
 
 public class WorldMaker : MonoBehaviour {
     MapDataManager mdm;
@@ -11,12 +12,9 @@ public class WorldMaker : MonoBehaviour {
 
     private void Awake()
     {
-        mdm = new MapDataManager();
+        mdm = ScriptableObject.CreateInstance<MapDataManager>();
         dataFilePath = Application.dataPath + "/Resources/MapData/";
-    }
-
-    private void OnEnable()
-    {
+        //txxt.text = dataFilePath;
         SetTileMap();
     }
 
