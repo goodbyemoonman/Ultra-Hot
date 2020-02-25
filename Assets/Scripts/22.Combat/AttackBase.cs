@@ -32,7 +32,7 @@ public abstract class AttackBase : MonoBehaviour {
 
     IEnumerator Timer(float duration)
     {
-        yield return new WaitForSecondsRealtime(duration);
+        yield return new WaitForSeconds(duration);
         RefreshCooldown();
     }
     
