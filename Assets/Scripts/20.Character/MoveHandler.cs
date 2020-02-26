@@ -5,7 +5,7 @@ using UnityEngine;
 public class MoveHandler : MonoBehaviour {
     Rigidbody2D rgbd;
     bool sw = true;
-    readonly float speed = 4f;
+    readonly float speed = 2f;
 
     private void Awake()
     {
@@ -46,6 +46,8 @@ public class MoveHandler : MonoBehaviour {
     {
         if (sw == false)
             return;
+        if (rgbd == null)
+            Awake();
 
         dir *= speed;
 

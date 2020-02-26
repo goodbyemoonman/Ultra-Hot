@@ -4,10 +4,11 @@ using UnityEngine;
 
 public abstract class AIBase : MonoBehaviour {
     protected enum Dir { NONE, RIGHT, LEFT, FORWARD, BACKWARD }
+    protected AIHolder holder;
 
     public abstract void Do(GameObject who);
 
-    protected IEnumerator RotateHelper(GameObject who, float angle)
+    public IEnumerator RotateHelper(GameObject who, float angle)
     {
         float originAngle = who.transform.eulerAngles.z;
         for (float t = 0; t < 0.25f; t += Time.deltaTime)
@@ -55,23 +56,10 @@ public abstract class AIBase : MonoBehaviour {
             return false;
 
     }
-}
 
-public class SeekAI : AIBase
-{
-    private void OnEnable()
+    public void SetHoler(AIHolder holder)
     {
-        Do(gameObject);
-    }
-
-    public override void Do(GameObject who)
-    {
-        bool front = CanMoveTo(gameObject, Dir.FORWARD);
-        Debug.Log("Can front move? " + front);
-        bool left = CanMoveTo(gameObject, Dir.LEFT);
-        Debug.Log("Can left move? " + left);
-        bool right = CanMoveTo(gameObject, Dir.RIGHT);
-        Debug.Log("Can right move? " + right);
-
+        this.holder = holder;
     }
 }
+
