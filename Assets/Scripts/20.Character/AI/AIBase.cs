@@ -2,25 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class AIBase : MonoBehaviour {
+public abstract class AIBase {
     protected enum Dir { NONE, RIGHT, LEFT, FORWARD, BACKWARD }
     protected AIHolder holder;
+    RotateUnitCommand rotateCommand;
+    MoveUnitCommand moveCommand;
+
+    public void Awake()
+    {
+        rotateCommand = new RotateUnitCommand();
+        moveCommand = new MoveUnitCommand(Vector2.right * 0.5f, Space.Self);
+    }
+
+    public abstract void Initialize(GameObject who);
 
     public abstract void Do(GameObject who);
-
-    public IEnumerator RotateHelper(GameObject who, float angle)
-    {
-        float originAngle = who.transform.eulerAngles.z;
-        for (float t = 0; t < 0.25f; t += Time.deltaTime)
-        {
-            who.transform.eulerAngles =
-                new Vector3(0, 0,
-                Mathf.Lerp(originAngle, originAngle + angle, t * 4f));
-
-            yield return null;
-        }
-        who.transform.eulerAngles = new Vector3(0, 0, originAngle + angle);
-    }
 
     protected bool CanMoveTo(GameObject who, Dir dir)
     {
@@ -60,6 +56,38 @@ public abstract class AIBase : MonoBehaviour {
     public void SetHoler(AIHolder holder)
     {
         this.holder = holder;
+    }
+
+    protected void LookAt(Dir direction, GameObject who)
+    {
+        float angle = 0f;
+        switch (direction)
+        {
+            case Dir.BACKWARD:
+                angle = -180f;
+                break;
+            case Dir.RIGHT:
+                angle = -90f;
+                break;
+            case Dir.FORWARD:
+                angle = 0f;
+                break;
+            case Dir.LEFT:
+                angle = 90f;
+                break;
+            default:
+                angle = 0f;
+                break;
+        }
+
+        rotateCommand.Initialize(who.transform.eulerAngles.z + angle);
+        rotateCommand.Execute(who);
+    }
+
+    protected void MoveCommand(GameObject who)
+    {
+        moveCommand.SetDirection(Vector2.right);
+        moveCommand.Execute(who);
     }
 }
 

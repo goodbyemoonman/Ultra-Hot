@@ -2,170 +2,213 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SeekAI : AIBase
-{
-    Dir toMoveDir;
-    RotateUnitCommand rotateCommand = new RotateUnitCommand();
-    MoveUnitCommand moveCommand = new MoveUnitCommand(Vector2.right * 0.5f, Space.Self);
+public class SeekAI : AIBase {
+    List<Node> openNodes;
+    List<Node> closedNodes;
+    List<Node> nodePool;
+    List<Node> path;
+    Vector2Int mapSize;
+
+    public new void Awake()
+    {
+        base.Awake();
+        openNodes = new List<Node>();
+        closedNodes = new List<Node>();
+        nodePool = new List<Node>();
+    }
 
     public override void Do(GameObject who)
     {
-        toMoveDir = DetectLongDir(who);
-        LookAt(toMoveDir, who);
-        StartCoroutine(Seek(who));
+
     }
 
-    Dir DetectLongDir(GameObject who)
+    void Seek(Vector2Int startPos, Vector2Int targetPos)
     {
-        float distance;
-        Dir result;
-        RaycastHit2D hit;
-        hit = Physics2D.Raycast(
-            who.transform.position, Vector2.down, 10f, 
-            1 << LayerMask.NameToLayer("Wall"));
+        InitNodeList();
+        Node sn = GetNewNode(startPos.x, startPos.y);
+        openNodes.Add(sn);
+        
+        while(openNodes.Count > 0)
+        {
+            Node curNode = GetCurrentNode(openNodes);
+            closedNodes.Add(curNode);
 
-        result = Dir.RIGHT;
-        if (!hit)
-        {
-            distance = 10f;
-        }
-        else
-        {
-            distance = (hit.point - (Vector2)who.transform.position).magnitude;
-        }
-
-        hit = Physics2D.Raycast(
-            who.transform.position, Vector2.up, 10f,
-            1 << LayerMask.NameToLayer("Wall"));
-        if(hit)
-        {
-            if(distance < (hit.point - (Vector2)who.transform.position).magnitude)
+            //마무리 단계
+            if(curNode.pos == targetPos)
             {
-                distance = (hit.point - (Vector2)who.transform.position).magnitude;
-                result = Dir.LEFT;
-            }
-        }
-        else
-        {
-            distance = 10f;
-            result = Dir.LEFT;
-        }
+                while(curNode.pos != startPos)
+                {
+                    path.Add(curNode);
+                    curNode = curNode.parent;
+                }
+                path.Add(curNode);
+                path.Reverse();
 
-        hit = Physics2D.Raycast(
-            who.transform.position, Vector2.right, 10f,
-            1 << LayerMask.NameToLayer("Wall"));
-        if (hit)
-        {
-            if (distance < (hit.point - (Vector2)who.transform.position).magnitude)
-            {
-                distance = (hit.point - (Vector2)who.transform.position).magnitude;
-                result = Dir.FORWARD;
+                return;
             }
 
+            Vector2Int dir = new Vector2Int(-1, -1);
+            CheckAddToOpenNodes(curNode.pos + dir, curNode, targetPos);
+            dir = new Vector2Int(-1, 0);
+            CheckAddToOpenNodes(curNode.pos + dir, curNode, targetPos);
+            dir = new Vector2Int(-1, 1);
+            CheckAddToOpenNodes(curNode.pos + dir, curNode, targetPos);
+            dir = new Vector2Int(0, -1);
+            CheckAddToOpenNodes(curNode.pos + dir, curNode, targetPos);
+            dir = new Vector2Int(0, 1);
+            CheckAddToOpenNodes(curNode.pos + dir, curNode, targetPos);
+            dir = new Vector2Int(1, -1);
+            CheckAddToOpenNodes(curNode.pos + dir, curNode, targetPos);
+            dir = new Vector2Int(1, 0);
+            CheckAddToOpenNodes(curNode.pos + dir, curNode, targetPos);
+            dir = new Vector2Int(1, 1);
+            CheckAddToOpenNodes(curNode.pos + dir, curNode, targetPos);
         }
-        else
-        {
-            distance = 10f;
-            result = Dir.FORWARD;
-        }
+    }
 
-        hit = Physics2D.Raycast(
-            who.transform.position, Vector2.left, 10f,
-            1 << LayerMask.NameToLayer("Wall"));
-        if (hit)
-        {
-            if(distance < (hit.point - (Vector2)who.transform.position).magnitude)
-            {
-                distance = (hit.point - (Vector2)who.transform.position).magnitude;
-                result = Dir.BACKWARD;
-            }
-        }
-        else
-        {
-            distance = 10f;
-            result = Dir.BACKWARD;
-        }
+    void CheckAddToOpenNodes(Vector2Int checkPos, Node curNode, Vector2Int targetPos)
+    {
+        //맵 범위 밖인 경우
+        if (checkPos.x < 0 || checkPos.y < 0 || mapSize.x <= checkPos.x || mapSize.y <= checkPos.y)
+            return;
+        //벽인 경우
+        if (WorldMaker.Instance.IsWall(checkPos))
+            return;
+        //닫힌노드인 경우
+        if (GetNodeExist(checkPos, closedNodes) != null)
+            return;
+        //벽 사이를 뚫거나 벽에 막히는경우
+        if (WorldMaker.Instance.IsWall(new Vector2Int(checkPos.x, curNode.pos.y)) ||
+            WorldMaker.Instance.IsWall(new Vector2Int(curNode.pos.x, checkPos.y)))
+            return;
 
+        Node n = GetNodeExist(checkPos, openNodes);
+        if (n == null)
+            n = GetNewNode(checkPos.x, checkPos.y);
+
+        int moveCost = curNode.G +
+            (IsDiagonal(checkPos, curNode.pos) ? 14 : 10);
+
+        if(moveCost < n.G || !openNodes.Contains(n))
+        {
+            n.G = moveCost;
+            n.H = GetH(n.pos, targetPos);
+            n.parent = curNode;
+
+            openNodes.Add(n);
+        }
+    }
+
+    bool IsDiagonal(Vector2Int a, Vector2Int b)
+    {
+        return (a.x != b.x && a.y != b.y);
+    }
+
+    Node GetNodeExist(Vector2Int pos, List<Node> nodes)
+    {
+        foreach(Node n in nodes)
+        {
+            if (n.pos == pos)
+                return n;
+        }
+        return null;
+    }
+
+    Node GetCurrentNode(List<Node> nodes)
+    {
+        if (nodes.Count == 0)
+            return null;
+        Node result = nodes[0];
+        foreach(Node n in nodes)
+        {
+            if (n.F <= result.F && n.H < result.H)
+                result = n;
+        }
+        nodes.Remove(result);
         return result;
     }
 
-    void LookAt(Dir direction, GameObject who)
+    public void SetTargetTf(Transform target)
     {
-        float angle = 0f;
-        switch (direction)
-        {
-            case Dir.BACKWARD:
-                angle = -180f;
-                break;
-            case Dir.RIGHT:
-                angle = -90f;
-                break;
-            case Dir.FORWARD:
-                angle = 0f;
-                break;
-            case Dir.LEFT:
-                angle = 90f;
-                break;
-            default:
-                angle = 0f;
-                break;
-        }
 
-        rotateCommand.Initialize(who.transform.eulerAngles.z + angle);
-        rotateCommand.Execute(who);
     }
 
-    IEnumerator Seek(GameObject who)
+    public override void Initialize(GameObject who)
     {
-        ToIntPos(who);
-        float t = 0;
-        Vector2 originPos = who.transform.position;
-        while (true)
-        {
-            moveCommand.SetDirection(Vector2.right);
-            moveCommand.Execute(who);
-            if((originPos - (Vector2)who.transform.position).magnitude >= 1 || t > 1f)
-            {
-                ToIntPos(who);
-                t = 0;
-                toMoveDir = CheckLRF(who);
-                LookAt(toMoveDir, who);
-                originPos = who.transform.position;
-            }
-            t += Time.deltaTime;
-            yield return null;
-        }
+        InitNodeList();
     }
 
-    void ToIntPos(GameObject who)
+    void InitNodeList()
     {
-        who.transform.position = new Vector3(
-            Mathf.RoundToInt(who.transform.position.x),
-            Mathf.RoundToInt(who.transform.position.y), 0);
+        mapSize = WorldMaker.Instance.GetTileMapSize();
+        foreach (Node n in openNodes)
+        {
+            nodePool.Add(n);
+            n.Init();
+            openNodes.Remove(n);
+        }
+        openNodes.Clear();
+        foreach (Node n in closedNodes)
+        {
+            nodePool.Add(n);
+            n.Init();
+            closedNodes.Remove(n);
+        }
+        closedNodes.Clear();
+        foreach (Node n in path)
+        {
+            nodePool.Add(n);
+            n.Init();
+            path.Remove(n);
+        }
+        path.Clear();
     }
 
-    Dir CheckLRF(GameObject who)
+    Node GetNewNode(int x, int y)
     {
-        List<Dir> dirs = new List<Dir>();
-        if(CanMoveTo(who, Dir.FORWARD))
+        Node n;
+        if(nodePool.Count > 0)
         {
-            dirs.Add(Dir.FORWARD);
-            dirs.Add(Dir.FORWARD);
-        }
-        if (CanMoveTo(who, Dir.LEFT))
-            dirs.Add(Dir.LEFT);
-        if (CanMoveTo(who, Dir.RIGHT))
-            dirs.Add(Dir.RIGHT);
-
-        Dir result;
-
-        if (dirs.Count != 0)
-        {
-            result = dirs[Random.Range(0, dirs.Count - 1)];
+            n = nodePool[0];
+            nodePool.Remove(n);
+            n.Init();
+            n.x = x;
+            n.y = y;
         }
         else
-            result = Dir.BACKWARD;
+        {
+            n = new Node(x, y);
+        }
 
+        return n;
+    }
+
+    int GetH(Vector2Int origin, Vector2Int target)
+    {
+        int result = Mathf.Abs(origin.x - target.x) + Mathf.Abs(origin.y - target.y);
+        result *= 10;
         return result;
     }
 }
+
+class Node
+{
+    public Node(int x, int y)
+    {
+        this.x = x;
+        this.y = y;
+    }
+    public Node parent;
+    public int x, y, G, H;
+    public int F { get { return G + H; } }
+    public void Init()
+    {
+        x = y = G = H = 0;
+        parent = null;
+    }
+    public Vector2Int pos
+    {
+        get { return new Vector2Int(x, y); }
+    }
+}
+

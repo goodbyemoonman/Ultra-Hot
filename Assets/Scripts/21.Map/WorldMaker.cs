@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 using UnityEngine.UI;
 
-public class WorldMaker : MonoBehaviour {
+public class WorldMaker : Singleton<WorldMaker> {
     MapDataManager mdm;
     public Tilemap obstacleGrid;
     public Tile obstacle;
@@ -30,5 +30,19 @@ public class WorldMaker : MonoBehaviour {
                 0);
             obstacleGrid.SetTile(pos, obstacle);
         }
+    }
+
+    public Vector2Int GetTileMapSize()
+    {
+        return mdm.source.mapSize;
+    }
+
+    public bool IsWall(Vector2Int pos)
+    {
+        Vector3Int input = new Vector3Int(pos.x, pos.y, 0);
+        if (obstacleGrid.GetTile(input) == obstacle)
+            return true;
+        else
+            return false;
     }
 }

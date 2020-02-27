@@ -73,6 +73,7 @@
     <Compile Include="Assets\Scripts\20.Character\AI\AIBase.cs" />
     <Compile Include="Assets\Scripts\20.Character\AI\AIHolder.cs" />
     <Compile Include="Assets\Scripts\20.Character\AI\SeekAI.cs" />
+    <Compile Include="Assets\Scripts\20.Character\AI\WalkAroundAI.cs" />
     <Compile Include="Assets\Scripts\20.Character\AtkHandler.cs" />
     <Compile Include="Assets\Scripts\20.Character\DumbAI.cs" />
     <Compile Include="Assets\Scripts\20.Character\Follow.cs" />
@@ -81,7 +82,6 @@
     <Compile Include="Assets\Scripts\20.Character\PlayerHealthManager.cs" />
     <Compile Include="Assets\Scripts\21.Map\MapDataManager.cs" />
     <Compile Include="Assets\Scripts\21.Map\MapDataSource.cs" />
-    <Compile Include="Assets\Scripts\21.Map\TestScript.cs" />
     <Compile Include="Assets\Scripts\21.Map\WorldMaker.cs" />
     <Compile Include="Assets\Scripts\22.Combat\AttackBase.cs" />
     <Compile Include="Assets\Scripts\22.Combat\PistolAttack.cs" />
@@ -93,6 +93,7 @@
     <Compile Include="Assets\Scripts\Equipment\EquipHolder.cs" />
     <Compile Include="Assets\Scripts\Equipment\Equipment.cs" />
     <Compile Include="Assets\Scripts\Utility\Singleton.cs" />
+    <Compile Include="Assets\Scripts\Utility\TestScript.cs" />
     <None Include="Assets\Resources\ObjectPoolData\ObjectPoolData.xml" />
     <None Include="Assets\Resources\MapData\S1.xml" />
     <None Include="Assets\Resources\MapData\TestMap.xml" />
