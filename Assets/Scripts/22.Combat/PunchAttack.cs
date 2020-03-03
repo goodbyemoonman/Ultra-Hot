@@ -9,6 +9,7 @@ public class PunchAttack : AttackBase {
     private void Awake()
     {
         cooltime = 0.2f;
+        range = 1.5f;
     }
 
     protected override void Execute()
@@ -21,5 +22,13 @@ public class PunchAttack : AttackBase {
 
     public override void ThrowThisObj()
     {
+    }
+
+    protected override void ExecuteEnemy()
+    {
+        if (punchL.activeInHierarchy)
+            punchR.SetActive(true);
+        else
+            punchL.SetActive(true);
     }
 }

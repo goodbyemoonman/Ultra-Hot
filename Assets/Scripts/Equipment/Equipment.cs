@@ -4,10 +4,14 @@ using UnityEngine;
 
 public class Equipment : MonoBehaviour {
     Rigidbody2D rgbd;
+    public delegate void Remind(int n);
+    public event Remind BulletReminder;
+    AttackBase ab;
 
     private void Awake()
     {
         rgbd = GetComponent<Rigidbody2D>();
+        ab = GetComponent<AttackBase>();
     }
 
     public void EquipTo(Transform parent)
@@ -15,7 +19,9 @@ public class Equipment : MonoBehaviour {
         transform.SetParent(parent);
         StopAllCoroutines();
         StartCoroutine(EquipMovement());
+        ab.Init();
         TargetLayerSet(parent.gameObject.layer);
+        ab.SetLayer(parent.gameObject.layer);
     }
 
     void TargetLayerSet(int parentLayer)
@@ -28,7 +34,7 @@ public class Equipment : MonoBehaviour {
             targetLayer = 1 << LayerMask.NameToLayer("PlayerCharacter");
 
         targetLayer |= 1 << LayerMask.NameToLayer("Wall");
-        SendMessage("SetTargetLayer", targetLayer);
+        ab.SetTargetLayer(targetLayer);
     }
 
     public void Drop()
@@ -78,5 +84,12 @@ public class Equipment : MonoBehaviour {
             Drop();
         else
             rgbd.AddForce(dir.normalized * 100f);
+    }
+
+    public void BulletRemind(int n)
+    {
+        Debug.Log("bullet remind : " + n.ToString());
+        if (BulletReminder != null)
+            BulletReminder(n);
     }
 }

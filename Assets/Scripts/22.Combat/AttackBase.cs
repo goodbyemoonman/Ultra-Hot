@@ -7,6 +7,12 @@ public abstract class AttackBase : MonoBehaviour {
     protected float range = 1;
     bool isCooldown = false;
     protected int targetLayer;
+    protected int parentLayer;
+
+    public void Init()
+    {
+        isCooldown = false;
+    }
 
     public virtual void TryExecute()
     {
@@ -18,11 +24,16 @@ public abstract class AttackBase : MonoBehaviour {
         StopAllCoroutines();
         StartCoroutine(Timer(cooltime));
 
-        Execute();
+        if (parentLayer == LayerMask.NameToLayer("PlayerCharacter"))
+            Execute();
+        else
+            ExecuteEnemy();
     }
 
     protected abstract void Execute();
 
+    protected abstract void ExecuteEnemy();
+    
     void RefreshCooldown()
     {
         isCooldown = false;
@@ -32,12 +43,20 @@ public abstract class AttackBase : MonoBehaviour {
 
     IEnumerator Timer(float duration)
     {
-        yield return new WaitForSeconds(duration);
+        if (parentLayer == LayerMask.NameToLayer("PlayerCharacter"))
+            yield return new WaitForSecondsRealtime(duration);
+        else
+            yield return new WaitForSeconds(duration);
         RefreshCooldown();
     }
     
     public void SetTargetLayer(int layer)
     {
         targetLayer = layer;
+    }
+
+    public void SetLayer(int layer)
+    {
+        parentLayer = layer;
     }
 }

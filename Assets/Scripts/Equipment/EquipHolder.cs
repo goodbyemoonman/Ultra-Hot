@@ -9,6 +9,7 @@ public class EquipHolder : MonoBehaviour {
     GameObject equipment;
     public Transform equipPos;
     FixedJoint2D fxjt2d;
+    public BulletReminder br;
 
     private void Awake()
     {
@@ -49,6 +50,11 @@ public class EquipHolder : MonoBehaviour {
         fxjt2d.connectedBody = equipCandidate.GetComponent<Rigidbody2D>();
         equipCandidate.SendMessage("EquipTo", equipPos);
         equipment = equipCandidate;
+        if (br != null)
+        {
+            Debug.Log("add bullet reminder");
+            equipment.GetComponent<Equipment>().BulletReminder += br.Remind;
+        }
     }
 
     GameObject GetShortestDistanceGO(float boundary)
@@ -79,6 +85,8 @@ public class EquipHolder : MonoBehaviour {
             return;
         fxjt2d.connectedBody = null;
         fxjt2d.enabled = false;
+        if(br != null)
+            equipment.GetComponent<Equipment>().BulletReminder -= br.Remind;
         equipment.SendMessage("ThrowThisObj");
         equipment = null;
     }
@@ -89,6 +97,8 @@ public class EquipHolder : MonoBehaviour {
             return;
         fxjt2d.connectedBody = null;
         fxjt2d.enabled = false;
+        if (br != null)
+            equipment.GetComponent<Equipment>().BulletReminder -= br.Remind;
         equipment.SendMessage("Drop");
         equipment = null;
     }
@@ -97,4 +107,5 @@ public class EquipHolder : MonoBehaviour {
     {
         return (tf.position - transform.position).magnitude;
     }
+    
 }

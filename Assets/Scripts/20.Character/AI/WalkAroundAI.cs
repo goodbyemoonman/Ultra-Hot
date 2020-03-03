@@ -27,6 +27,10 @@ public class WalkAroundAI : AIBase
             toMoveDir = CheckLRF(who);
             LookAt(toMoveDir, who);
             originPos = who.transform.position;
+            if(FindClosestEquipment(who) != null)
+            {
+                holder.Seek(FindClosestEquipment(who).transform);
+            }
         }
         t += Time.deltaTime;
     }

@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SeekAI : AIBase {
+public class SeekAI : AIBase
+{
+    Transform target;
     List<Node> openNodes;
     List<Node> closedNodes;
     List<Node> nodePool;
     List<Node> path;
-    Vector2Int mapSize;
 
     public new void Awake()
     {
@@ -19,7 +20,25 @@ public class SeekAI : AIBase {
 
     public override void Do(GameObject who)
     {
+        if(path.Count == 0){
+            Seek(GetIntPos(who.transform.position), GetIntPos(target.position));
 
+            if(path.Count == 0)
+            {
+                //그 곳까지 가는 방법이 없음.
+            }
+        }
+
+
+    }
+
+    Vector2Int GetIntPos(Vector2 input)
+    {
+        Vector2Int result = new Vector2Int(
+            Mathf.RoundToInt(input.x), 
+            Mathf.RoundToInt(input.y));
+
+        return result;
     }
 
     void Seek(Vector2Int startPos, Vector2Int targetPos)
@@ -27,16 +46,16 @@ public class SeekAI : AIBase {
         InitNodeList();
         Node sn = GetNewNode(startPos.x, startPos.y);
         openNodes.Add(sn);
-        
-        while(openNodes.Count > 0)
+
+        while (openNodes.Count > 0)
         {
             Node curNode = GetCurrentNode(openNodes);
             closedNodes.Add(curNode);
 
             //마무리 단계
-            if(curNode.pos == targetPos)
+            if (curNode.pos == targetPos)
             {
-                while(curNode.pos != startPos)
+                while (curNode.parent != null)
                 {
                     path.Add(curNode);
                     curNode = curNode.parent;
@@ -68,9 +87,6 @@ public class SeekAI : AIBase {
 
     void CheckAddToOpenNodes(Vector2Int checkPos, Node curNode, Vector2Int targetPos)
     {
-        //맵 범위 밖인 경우
-        if (checkPos.x < 0 || checkPos.y < 0 || mapSize.x <= checkPos.x || mapSize.y <= checkPos.y)
-            return;
         //벽인 경우
         if (WorldMaker.Instance.IsWall(checkPos))
             return;
@@ -89,7 +105,7 @@ public class SeekAI : AIBase {
         int moveCost = curNode.G +
             (IsDiagonal(checkPos, curNode.pos) ? 14 : 10);
 
-        if(moveCost < n.G || !openNodes.Contains(n))
+        if (moveCost < n.G || !openNodes.Contains(n))
         {
             n.G = moveCost;
             n.H = GetH(n.pos, targetPos);
@@ -106,10 +122,10 @@ public class SeekAI : AIBase {
 
     Node GetNodeExist(Vector2Int pos, List<Node> nodes)
     {
-        foreach(Node n in nodes)
+        for (int i = 0; i < nodes.Count; i++)
         {
-            if (n.pos == pos)
-                return n;
+            if (nodes[i].pos == pos)
+                return nodes[i];
         }
         return null;
     }
@@ -119,18 +135,18 @@ public class SeekAI : AIBase {
         if (nodes.Count == 0)
             return null;
         Node result = nodes[0];
-        foreach(Node n in nodes)
+        for (int i = 0; i < nodes.Count; i++)
         {
-            if (n.F <= result.F && n.H < result.H)
-                result = n;
+            if (nodes[i].F <= result.F && nodes[i].H < result.H)
+                result = nodes[i];
         }
         nodes.Remove(result);
         return result;
     }
 
-    public void SetTargetTf(Transform target)
+    public void SetTargetTf(Transform _target)
     {
-
+        target = _target;
     }
 
     public override void Initialize(GameObject who)
@@ -140,26 +156,31 @@ public class SeekAI : AIBase {
 
     void InitNodeList()
     {
-        mapSize = WorldMaker.Instance.GetTileMapSize();
-        foreach (Node n in openNodes)
+        for (int i = 0; i < openNodes.Count; i++)
         {
-            nodePool.Add(n);
-            n.Init();
-            openNodes.Remove(n);
+            if (nodePool.Contains(openNodes[i]))
+                continue;
+            nodePool.Add(openNodes[i]);
+            openNodes[i].Init();
+            openNodes.Remove(openNodes[i]);
         }
         openNodes.Clear();
-        foreach (Node n in closedNodes)
+        for (int i = 0; i < closedNodes.Count; i++)
         {
-            nodePool.Add(n);
-            n.Init();
-            closedNodes.Remove(n);
+            if (nodePool.Contains(closedNodes[i]))
+                continue;
+            nodePool.Add(closedNodes[i]);
+            closedNodes[i].Init();
+            closedNodes.Remove(closedNodes[i]);
         }
         closedNodes.Clear();
-        foreach (Node n in path)
+        for (int i = 0; i < path.Count; i++)
         {
-            nodePool.Add(n);
-            n.Init();
-            path.Remove(n);
+            if (nodePool.Contains(path[i]))
+                continue;
+            nodePool.Add(path[i]);
+            path[i].Init();
+            path.Remove(path[i]);
         }
         path.Clear();
     }
@@ -167,7 +188,7 @@ public class SeekAI : AIBase {
     Node GetNewNode(int x, int y)
     {
         Node n;
-        if(nodePool.Count > 0)
+        if (nodePool.Count > 0)
         {
             n = nodePool[0];
             nodePool.Remove(n);
@@ -191,6 +212,7 @@ public class SeekAI : AIBase {
     }
 }
 
+[System.Serializable]
 class Node
 {
     public Node(int x, int y)

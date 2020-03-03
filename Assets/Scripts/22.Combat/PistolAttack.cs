@@ -11,7 +11,8 @@ public class PistolAttack : AttackBase {
     private void Awake()
     {
         e = GetComponent<Equipment>();
-        cooltime = 1f;
+        range = 8f;
+        cooltime = 0.5f;
     }
     
     public override void ThrowThisObj()
@@ -42,17 +43,45 @@ public class PistolAttack : AttackBase {
     
     protected override void Execute()
     {
-        if (bulletCount < 1)
+        if (!HasBullet())
             return;
 
-        bulletCount--;
+        ShootBullet(Vector3.zero);
+    }
 
+    protected override void ExecuteEnemy()
+    {
+        if (!HasBullet())
+        {
+            gameObject.SendMessage("RunOutBullet");
+            return;
+        }
+        ShootBullet(new Vector3(0, 0, Random.Range(-15f, 15f)));
+    }
+
+    bool HasBullet()
+    {
+        bool result;
+        if(bulletCount < 1)
+        {
+            result = false;
+        }
+        else
+        {
+            bulletCount--;
+            result = true;
+        }
+        e.BulletRemind(bulletCount);
+        return result;
+    }
+
+    void ShootBullet(Vector3 addRotation)
+    {
         GameObject bullet = ObjPoolManager.Instance.GetObject(ObjectPoolList.BulletPrefab);
         bullet.transform.SetPositionAndRotation(
-            firePos.position, 
-            Quaternion.Euler(transform.eulerAngles));
+            firePos.position,
+            Quaternion.Euler(transform.eulerAngles + addRotation));
         bullet.transform.SetParent(null);
         bullet.SetActive(true);
     }
-
 }
