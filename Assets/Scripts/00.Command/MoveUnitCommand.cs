@@ -2,10 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MoveUnitCommand : ICommand
+public class MoveUnitCommand : MonoBehaviour
 {
     Space space;
     Vector2 dir;
+    MoveHandler mh;
+
+    private void Awake()
+    {
+        mh = GetComponent<MoveHandler>();
+    }
 
     public MoveUnitCommand(Vector2 dir, Space space = Space.World)
     {
@@ -13,23 +19,28 @@ public class MoveUnitCommand : ICommand
         this.space = space;
     }
 
-    public void Execute(GameObject obj)
+    private void Update()
+    {
+        Execute();
+    }
+
+    void Execute()
     {
         if (space == Space.World)
-            obj.SendMessage("MoveToWorldDir", dir);
+            mh.MoveToWorldDir(dir);
         else
-            obj.SendMessage("MoveToSelfDir", dir);
+            mh.MoveToSelfDir(dir);
 
         dir = Vector2.zero;
     }
 
-    public void SetDirection(Vector2 input)
+    public void MoveTo(Vector2 directioin)
     {   
         //이동 명령이 들어오면 적어도 한번은 수행
-        if (input == Vector2.zero)
+        if (directioin == Vector2.zero)
             return;
 
-        this.dir = input;
+        this.dir = directioin;
     }
 }
 

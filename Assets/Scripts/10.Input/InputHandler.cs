@@ -5,8 +5,6 @@ using UnityEngine;
 public class InputHandler : MonoBehaviour
 {
     public TimeScaleManager tsm;
-    MoveUnitCommand moveUnitCommand = new MoveUnitCommand(Vector2.zero);
-    RotateUnitCommand rotateUnitCommand = new RotateUnitCommand();
     public GameObject player;
     public bool canInput = true;
     Vector3 preMousePos;
@@ -28,8 +26,6 @@ public class InputHandler : MonoBehaviour
         {
             player.SendMessage("EKeyDown");
         }
-        
-        moveUnitCommand.Execute(player);
     }
 
     void TimeScaleInput(Vector3 inputMousePos, Vector2 inputDir)
@@ -49,17 +45,17 @@ public class InputHandler : MonoBehaviour
         if (canInput == false)
             return;
 
-        moveUnitCommand.SetDirection(inputDir);
+        player.SendMessage("MoveTo", inputDir);
 
         CommandToRotate(
-            GetAngle(player.transform.position, 
-            Camera.main.ScreenToWorldPoint(inputMousePos)));
+            Vector2.SignedAngle(
+                Vector2.right,
+                Camera.main.ScreenToWorldPoint(inputMousePos) - player.transform.position));
     }
 
     void CommandToRotate(float angle)
     {
-        rotateUnitCommand.Initialize(angle);
-        rotateUnitCommand.Execute(player);
+        player.SendMessage("LookAt", angle);
         SendMessage("RefreshSight");
     }
 

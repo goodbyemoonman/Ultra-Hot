@@ -80,14 +80,12 @@ public abstract class AIBase {
                 break;
         }
 
-        rotateCommand.Initialize(who.transform.eulerAngles.z + angle);
-        rotateCommand.Execute(who);
+        rotateCommand.LookAt(who.transform.eulerAngles.z + angle);
     }
 
     protected void MoveCommand(GameObject who)
     {
-        moveCommand.SetDirection(Vector2.right);
-        moveCommand.Execute(who);
+        moveCommand.MoveTo(Vector2.right);
     }
 
     protected GameObject FindClosestEquipment(GameObject who)

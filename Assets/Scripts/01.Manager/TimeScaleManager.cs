@@ -16,7 +16,7 @@ public class TimeScaleManager : MonoBehaviour {
 
     IEnumerator ControlTimeScale()
     {
-        target = 0.1f;
+        target = 0.05f;
         int multiplier = 1;
         while (true)
         {
@@ -37,7 +37,7 @@ public class TimeScaleManager : MonoBehaviour {
         switch (input)
         {
             case INPUTTYPE.NONE:
-                target = 0.1f;
+                target = 0.05f;
                 break;
             case INPUTTYPE.MOUSE:
                 target = 0.25f;
@@ -63,16 +63,18 @@ public class TimeScaleManager : MonoBehaviour {
         Time.timeScale = scale;
         canScale = false;
 
-        Invoke("TurnOnScale", duration);
-    }
-
-    void TurnOnScale()
-    {
-        canScale = true;
+        StopAllCoroutines();
+        StartCoroutine(TurnOnTimer(duration));
     }
 
     private void OnGUI()
     {
         GUI.Label(new Rect(0, 0, 100, 50), Time.timeScale.ToString());
+    }
+
+    IEnumerator TurnOnTimer(float duration)
+    {
+        yield return new WaitForSecondsRealtime(duration);
+        canScale = true;
     }
 }

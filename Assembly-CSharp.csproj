@@ -61,7 +61,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\00.Command\ICommand.cs" />
     <Compile Include="Assets\Scripts\00.Command\MoveUnitCommand.cs" />
     <Compile Include="Assets\Scripts\00.Command\RotateUnitCommand.cs" />
     <Compile Include="Assets\Scripts\01.Manager\ObjPoolData.cs" />
