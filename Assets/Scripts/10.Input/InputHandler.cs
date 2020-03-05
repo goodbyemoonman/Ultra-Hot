@@ -13,8 +13,8 @@ public class InputHandler : MonoBehaviour
     {
         Vector2 _direction = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         Vector3 _mousePos = Input.mousePosition;
-        TimeScaleInput(_mousePos, _direction);
-        PlayerMoveInput(_mousePos, _direction);
+        ToTimeScale(_mousePos, _direction);
+        ToPlayer(_mousePos, _direction);
 
         if (Input.GetMouseButtonDown(0))
             player.SendMessage("LeftClick");
@@ -28,7 +28,7 @@ public class InputHandler : MonoBehaviour
         }
     }
 
-    void TimeScaleInput(Vector3 inputMousePos, Vector2 inputDir)
+    void ToTimeScale(Vector3 inputMousePos, Vector2 inputDir)
     {
         if (inputDir != Vector2.zero)
             tsm.SetInputType(INPUTTYPE.KEYBOARD);
@@ -40,17 +40,17 @@ public class InputHandler : MonoBehaviour
         preMousePos = Input.mousePosition;
     }
 
-    void PlayerMoveInput(Vector3 inputMousePos, Vector2 inputDir)
+    void ToPlayer(Vector3 inputMousePos, Vector2 inputDir)
     {
         if (canInput == false)
             return;
 
         player.SendMessage("MoveTo", inputDir);
-
-        CommandToRotate(
-            Vector2.SignedAngle(
+        float angle = Vector2.SignedAngle(
                 Vector2.right,
-                Camera.main.ScreenToWorldPoint(inputMousePos) - player.transform.position));
+                Camera.main.ScreenToWorldPoint(inputMousePos) - player.transform.position);
+
+        CommandToRotate(angle);
     }
 
     void CommandToRotate(float angle)

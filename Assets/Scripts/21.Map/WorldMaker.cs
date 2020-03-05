@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.UI;
 
 public class WorldMaker : Singleton<WorldMaker> {
     MapDataManager mdm;
@@ -14,7 +13,6 @@ public class WorldMaker : Singleton<WorldMaker> {
     {
         mdm = ScriptableObject.CreateInstance<MapDataManager>();
         dataFilePath = Application.dataPath + "/Resources/MapData/";
-        //txxt.text = dataFilePath;
         SetTileMap();
     }
 
@@ -30,11 +28,6 @@ public class WorldMaker : Singleton<WorldMaker> {
                 0);
             obstacleGrid.SetTile(pos, obstacle);
         }
-    }
-
-    public Vector2Int GetTileMapSize()
-    {
-        return mdm.source.mapSize;
     }
 
     public bool IsWall(Vector2Int pos)
