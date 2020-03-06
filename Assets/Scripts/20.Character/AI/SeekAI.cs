@@ -10,14 +10,6 @@ public class SeekAI : AIBase
     List<Node> nodePool;
     List<Node> path;
 
-    public new void Awake()
-    {
-        base.Awake();
-        openNodes = new List<Node>();
-        closedNodes = new List<Node>();
-        nodePool = new List<Node>();
-    }
-
     public override void Do(GameObject who)
     {
         if(path.Count == 0){
@@ -26,10 +18,14 @@ public class SeekAI : AIBase
             if(path.Count == 0)
             {
                 //그 곳까지 가는 방법이 없음.
+                //AI를 배회 AI로.
+                Debug.Log("길이 없다");
             }
         }
-
-
+        else
+        {
+            mh.CallBackMoveDir(path[0].pos, "Arrive");
+        }
     }
 
     Vector2Int GetIntPos(Vector2 input)
@@ -52,7 +48,7 @@ public class SeekAI : AIBase
             Node curNode = GetCurrentNode(openNodes);
             closedNodes.Add(curNode);
 
-            //마무리 단계
+            //마지막 부분. 길을 다 찾은 상태라면
             if (curNode.pos == targetPos)
             {
                 while (curNode.parent != null)
@@ -151,6 +147,11 @@ public class SeekAI : AIBase
 
     public override void Initialize(GameObject who)
     {
+        mh = who.GetComponent<MoveHandler>();
+        openNodes = new List<Node>();
+        closedNodes = new List<Node>();
+        nodePool = new List<Node>();
+        path = new List<Node>();
         InitNodeList();
     }
 
@@ -209,6 +210,19 @@ public class SeekAI : AIBase
         int result = Mathf.Abs(origin.x - target.x) + Mathf.Abs(origin.y - target.y);
         result *= 10;
         return result;
+    }
+
+    public void Arrive(GameObject who)
+    {
+        Debug.Log("도착");
+        if (path.Count <= 1)
+        {
+            path.Clear();
+            who.SendMessage("EKeyDown");
+            //AI를 배회 AI로.
+        }
+        else
+            path.RemoveAt(0);
     }
 }
 

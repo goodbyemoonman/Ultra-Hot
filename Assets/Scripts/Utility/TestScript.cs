@@ -4,30 +4,57 @@ using UnityEngine;
 
 public class TestScript : MonoBehaviour
 {
-    public GameObject who;
-    public GameObject target;
+    public Vector2 target;
+    Rigidbody2D rgbd;
+    float speed = 2f;
+    Vector2 prePos;
 
-    private void OnEnable()
+    private void Awake()
     {
-        Debug.Log(IsLookAt(who, target));
+        rgbd = GetComponent<Rigidbody2D>();
     }
 
-
-    bool IsLookAt(GameObject who, GameObject target)
+    private void Update()
     {
-        Vector3 pos = target.transform.position - who.transform.position;
-        Vector2 dir = Vector2.right;
-        float sin = Mathf.Sin(who.transform.eulerAngles.z * Mathf.Deg2Rad);
-        float cos = Mathf.Cos(who.transform.eulerAngles.z * Mathf.Deg2Rad);
-        dir.x = Vector2.right.x * cos - Vector2.right.y * sin;
-        dir.y = Vector2.right.x * sin + Vector2.right.y * cos;
+        CallBackMoveDir(target, "Callback");
+    }
 
-        float angle = Vector2.SignedAngle(dir, (Vector2)pos);
-        Debug.Log("angle = " + angle.ToString());
-        if (Mathf.Cos(angle * Mathf.Deg2Rad) > 0)
-            return true;
+    void Callback()
+    {
+        Debug.Log("Arrive to " + target);
+    }
+
+    public void CallBackMoveDir(Vector2 targetPos, string callbackName)
+    {
+        if (rgbd == null)
+            Awake();
+        if ((prePos - (Vector2)transform.position).magnitude > 1)
+            prePos = transform.position;
+        Vector2 dir = (targetPos - (Vector2)transform.position).normalized;
+        float angle = Vector2.SignedAngle(Vector2.right, dir);
+        transform.eulerAngles = new Vector3(0, 0, angle);
+        rgbd.velocity = dir * speed;
+
+        if (IsTargetInside(targetPos))
+        {
+            SendMessage(callbackName);
+        }
         else
+            prePos = transform.position;
+    }
+
+    bool IsTargetInside(Vector2 targetPos)
+    {
+        float preToNow = (prePos - (Vector2)transform.position).magnitude;
+        float preToTarget = (prePos - targetPos).magnitude;
+        float targetToNow = (targetPos - (Vector2)transform.position).magnitude;
+
+        if (preToNow < preToTarget)
             return false;
+        if (preToNow < targetToNow)
+            return false;
+
+        return true;
     }
 
 }

@@ -6,6 +6,7 @@ public class EquipHolder : MonoBehaviour {
     float boundary;
     RaycastHit2D[] hits;
     int targetLayer;
+    [SerializeField]
     GameObject equipment;
     public Transform equipPos;
     FixedJoint2D fxjt2d;

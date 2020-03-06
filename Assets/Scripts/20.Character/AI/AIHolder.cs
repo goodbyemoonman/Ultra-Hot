@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class AIHolder : MonoBehaviour {
+    public Transform tf;
     WalkAroundAI walkAroundAI;
     SeekAI seekAI;
     AIBase AINow;
@@ -10,18 +11,21 @@ public class AIHolder : MonoBehaviour {
     private void Awake()
     {
         walkAroundAI = new WalkAroundAI();
-        walkAroundAI.Awake();
         walkAroundAI.Initialize(gameObject);
         walkAroundAI.SetHoler(this);
         seekAI = new SeekAI();
-        seekAI.Awake();
         seekAI.Initialize(gameObject);
         seekAI.SetHoler(this);
     }
 
+    private void OnEnable()
+    {
+        Seek(tf);
+    }
+
     private void Update()
     {
-        walkAroundAI.Do(gameObject);
+        AINow.Do(gameObject);
     }
 
     public void Seek(Transform tf)
@@ -35,4 +39,8 @@ public class AIHolder : MonoBehaviour {
         gameObject.SendMessage("Throw");
     }
 
+    public void Arrive()
+    {
+        seekAI.Arrive(gameObject);
+    }
 }

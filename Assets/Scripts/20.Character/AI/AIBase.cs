@@ -5,14 +5,7 @@ using UnityEngine;
 public abstract class AIBase {
     protected enum Dir { NONE, RIGHT, LEFT, FORWARD, BACKWARD }
     protected AIHolder holder;
-    RotateUnitCommand rotateCommand;
-    MoveUnitCommand moveCommand;
-
-    public void Awake()
-    {
-        rotateCommand = new RotateUnitCommand();
-        moveCommand = new MoveUnitCommand(Vector2.right * 0.5f, Space.Self);
-    }
+    protected MoveHandler mh;
 
     public abstract void Initialize(GameObject who);
 
@@ -80,12 +73,16 @@ public abstract class AIBase {
                 break;
         }
 
-        rotateCommand.LookAt(who.transform.eulerAngles.z + angle);
+        if (mh == null)
+            mh = who.GetComponent<MoveHandler>();
+        mh.LookAt(who.transform.eulerAngles.z + angle);
     }
 
     protected void MoveCommand(GameObject who)
     {
-        moveCommand.MoveTo(Vector2.right);
+        if (mh == null)
+            mh = who.GetComponent<MoveHandler>();
+        mh.MoveForward();
     }
 
     protected GameObject FindClosestEquipment(GameObject who)

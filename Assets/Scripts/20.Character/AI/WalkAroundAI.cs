@@ -10,6 +10,7 @@ public class WalkAroundAI : AIBase
 
     public override void Initialize(GameObject who)
     {
+        mh = who.GetComponent<MoveHandler>();
         toMoveDir = DetectLongDir(who);
         LookAt(toMoveDir, who);
         ToIntPos(who);

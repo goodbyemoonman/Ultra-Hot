@@ -6,15 +6,23 @@ public class InputHandler : MonoBehaviour
 {
     public TimeScaleManager tsm;
     public GameObject player;
+    SightManager sm;
+    MoveHandler mh;
     public bool canInput = true;
     Vector3 preMousePos;
 
+    private void Awake()
+    {
+        mh = player.GetComponent<MoveHandler>();
+        sm = GetComponent<SightManager>();
+    }
+
     private void Update()
     {
-        Vector2 _direction = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        Vector3 _mousePos = Input.mousePosition;
-        ToTimeScale(_mousePos, _direction);
-        ToPlayer(_mousePos, _direction);
+        Vector2 dir = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        Vector3 mousePos = Input.mousePosition;
+        ToTimeScale(mousePos, dir);
+        ToPlayer(mousePos, dir);
 
         if (Input.GetMouseButtonDown(0))
             player.SendMessage("LeftClick");
@@ -45,7 +53,7 @@ public class InputHandler : MonoBehaviour
         if (canInput == false)
             return;
 
-        player.SendMessage("MoveTo", inputDir);
+        mh.MoveToWorldDirection(inputDir.normalized);
         float angle = Vector2.SignedAngle(
                 Vector2.right,
                 Camera.main.ScreenToWorldPoint(inputMousePos) - player.transform.position);
@@ -55,8 +63,8 @@ public class InputHandler : MonoBehaviour
 
     void CommandToRotate(float angle)
     {
-        player.SendMessage("LookAt", angle);
-        SendMessage("RefreshSight");
+        mh.LookAt(angle);
+        sm.RefreshSight();
     }
 
     float GetAngle(Vector2 objPos, Vector2 cursor)

@@ -61,8 +61,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\00.Command\MoveUnitCommand.cs" />
-    <Compile Include="Assets\Scripts\00.Command\RotateUnitCommand.cs" />
     <Compile Include="Assets\Scripts\01.Manager\ObjPoolData.cs" />
     <Compile Include="Assets\Scripts\01.Manager\ObjPoolManager.cs" />
     <Compile Include="Assets\Scripts\01.Manager\ObjPoolRWHelper.cs" />
@@ -75,7 +73,6 @@
     <Compile Include="Assets\Scripts\20.Character\AI\SeekAI.cs" />
     <Compile Include="Assets\Scripts\20.Character\AI\WalkAroundAI.cs" />
     <Compile Include="Assets\Scripts\20.Character\AtkHandler.cs" />
-    <Compile Include="Assets\Scripts\20.Character\DumbAI.cs" />
     <Compile Include="Assets\Scripts\20.Character\Follow.cs" />
     <Compile Include="Assets\Scripts\20.Character\HealthManager.cs" />
     <Compile Include="Assets\Scripts\20.Character\MoveHandler.cs" />

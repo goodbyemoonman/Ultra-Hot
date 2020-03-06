@@ -11,7 +11,7 @@ public class WorldMaker : Singleton<WorldMaker> {
 
     private void Awake()
     {
-        mdm = ScriptableObject.CreateInstance<MapDataManager>();
+        mdm = new MapDataManager();
         dataFilePath = Application.dataPath + "/Resources/MapData/";
         SetTileMap();
     }
