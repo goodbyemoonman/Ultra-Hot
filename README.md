@@ -65,7 +65,7 @@ WorldMaker입니다. 싱글턴 클래스를 상속받아 만들어졌습니다. 
         return result;
     }
  ```
- 0도를 중심으로 양쪽이 고르게 나오게 하기 위해서 오브젝트를 한 번에 두 개씩, y를 뒤집어 배치하였습니다. 만들어진 박스 시야 오브젝트와 원형 시야 오브젝트는 SightManager의 자식으로 들어가게 되는데 SightManager가 Player GameObject의 자식이기 때문에 Player GameObject의 위치와 회전을 상속합니다.      
+ 0도를 중심으로 양쪽이 고르게 나오게 하기 위해서 오브젝트를 한 번에 두 개씩, y를 뒤집어 배치하였습니다. 만들어진 박스 시야 오브젝트와 원형 시야 오브젝트는 Player GameObject의 자식인 parent 오브젝트를 부모 오브젝트로 할당하기 때문에 Player GameObject의 위치와 회전을 상속합니다.      
  SightData 클래스에서 RefreshSight 메서드를 호출하여 Raycast를 통해 벽의 위치를 파악한 후 그에 맞게 박스 시야 오브젝트의 크기와 원형 시야 오브젝트의 위치를 조절합니다.     
  RefreshSight는 Player의 방향이 갱신될 때마다 호출됩니다.     
  두 클래스의 코드는 [여기](Assets/Scripts/01.Manager/SightManager.cs)에서 확인할 수 있습니다. 
