@@ -31,6 +31,7 @@ public class WalkAroundAI : AIBase
             if(FindClosestEquipment(who) != null)
             {
                 holder.Seek(FindClosestEquipment(who).transform);
+                //현재 AI 추적으로 변경
             }
         }
         t += Time.deltaTime;
@@ -140,5 +141,11 @@ public class WalkAroundAI : AIBase
             result = Dir.BACKWARD;
 
         return result;
+    }
+
+    void SightObjCheck(GameObject who)
+    {
+        GameObject obj = FindClosestObjInSight(who);
+
     }
 }

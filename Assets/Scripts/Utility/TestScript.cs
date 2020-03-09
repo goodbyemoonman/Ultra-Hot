@@ -1,61 +1,109 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class TestScript : MonoBehaviour
 {
-    public Vector2 target;
-    Rigidbody2D rgbd;
-    float speed = 2f;
-    Vector2 prePos;
+    public Transform tf;
+    ChaseEquipAI chase;
 
-    private void Awake()
+    private void OnEnable()
     {
-        rgbd = GetComponent<Rigidbody2D>();
+        chase = new ChaseEquipAI();
+        chase.SetTarget(tf.gameObject);
     }
 
     private void Update()
     {
-        CallBackMoveDir(target, "Callback");
+        chase.Check(gameObject);
+        chase.Do(gameObject);
     }
 
-    void Callback()
-    {
-        Debug.Log("Arrive to " + target);
-    }
 
-    public void CallBackMoveDir(Vector2 targetPos, string callbackName)
+    Collider2D[] SortByDistance(Collider2D[] objs, Vector3 center)
     {
-        if (rgbd == null)
-            Awake();
-        if ((prePos - (Vector2)transform.position).magnitude > 1)
-            prePos = transform.position;
-        Vector2 dir = (targetPos - (Vector2)transform.position).normalized;
-        float angle = Vector2.SignedAngle(Vector2.right, dir);
-        transform.eulerAngles = new Vector3(0, 0, angle);
-        rgbd.velocity = dir * speed;
+        Collider2D tmp;
+        int pivot;
+        Stack<Vector2Int> lvrvs = new Stack<Vector2Int>();
 
-        if (IsTargetInside(targetPos))
+        CheckAndPushNewLvRv(lvrvs, 0, objs.Length - 1, objs);
+
+        while(lvrvs.Count != 0)
         {
-            SendMessage(callbackName);
+            Vector2Int lvrv = lvrvs.Pop();
+            pivot = lvrv.x;
+            int lv = pivot + 1;
+            int rv = lvrv.y;
+            Debug.Log("p : " + pivot + ", Lv : " + lv + ", Rv : " + rv);
+            while(lv < rv)
+            {
+                while (IsRBiggerThanL(
+                    objs[lv].transform.position, 
+                    objs[pivot].transform.position, center) && lv < rv)
+                {
+                    lv++;
+                }
+                while(IsRBiggerThanL(
+                    objs[pivot].transform.position, 
+                    objs[rv].transform.position, center) && lv <= rv)
+                {
+                    rv--;
+                }
+                
+                if (lv < rv)
+                {
+                    tmp = objs[rv];
+                    objs[rv] = objs[lv];
+                    objs[lv] = tmp;
+                    Debug.Log("Swap lv " + lv + ", rv " + rv);
+                }
+                else
+                {
+                    tmp = objs[pivot];
+                    objs[pivot] = objs[rv];
+                    objs[rv] = tmp;
+                    Debug.Log("Swap Pivot " + pivot + ", rv " + rv);
+
+                    CheckAndPushNewLvRv(lvrvs, lvrv.x, rv - 1, objs);
+                    CheckAndPushNewLvRv(lvrvs, lv, lvrv.y, objs);
+                }
+            }
         }
-        else
-            prePos = transform.position;
+
+        return objs;
     }
 
-    bool IsTargetInside(Vector2 targetPos)
+    bool IsRBiggerThanL(Vector3 lv, Vector3 rv, Vector3 center)
     {
-        float preToNow = (prePos - (Vector2)transform.position).magnitude;
-        float preToTarget = (prePos - targetPos).magnitude;
-        float targetToNow = (targetPos - (Vector2)transform.position).magnitude;
-
-        if (preToNow < preToTarget)
-            return false;
-        if (preToNow < targetToNow)
-            return false;
-
-        return true;
+        float lvdis = (lv - center).magnitude;
+        float rvdis = (rv - center).magnitude;
+        if (lvdis < rvdis)
+            return true;
+        return false;
     }
 
+    void CheckAndPushNewLvRv(Stack<Vector2Int> lvrvs, int lv, int rv, Collider2D[] objs)
+    {
+        if(rv - lv + 1 > 2)
+        {
+            lvrvs.Push(new Vector2Int(lv, rv));
+        }
+        else if(rv - lv + 1 == 2)
+        {
+            if (IsRBiggerThanL(
+                objs[rv].transform.position, 
+                objs[lv].transform.position, transform.position)){
+                Collider2D tmp = objs[lv];
+                objs[lv] = objs[rv];
+                objs[rv] = tmp;
+            }
+        }
+    }
+
+    Vector3 V2ItoV3(Vector2Int v)
+    {
+        return new Vector3(v.x, v.y);
+    }
 }
 

@@ -5,10 +5,10 @@ using UnityEngine;
 public class SeekAI : AIBase
 {
     Transform target;
-    List<Node> openNodes;
-    List<Node> closedNodes;
-    List<Node> nodePool;
-    List<Node> path;
+    List<OldNode> openNodes;
+    List<OldNode> closedNodes;
+    List<OldNode> nodePool;
+    List<OldNode> path;
 
     public override void Do(GameObject who)
     {
@@ -28,7 +28,7 @@ public class SeekAI : AIBase
         }
     }
 
-    Vector2Int GetIntPos(Vector2 input)
+    protected Vector2Int GetIntPos(Vector2 input)
     {
         Vector2Int result = new Vector2Int(
             Mathf.RoundToInt(input.x), 
@@ -37,15 +37,15 @@ public class SeekAI : AIBase
         return result;
     }
 
-    void Seek(Vector2Int startPos, Vector2Int targetPos)
+    protected void Seek(Vector2Int startPos, Vector2Int targetPos)
     {
         InitNodeList();
-        Node sn = GetNewNode(startPos.x, startPos.y);
+        OldNode sn = GetNewNode(startPos.x, startPos.y);
         openNodes.Add(sn);
 
         while (openNodes.Count > 0)
         {
-            Node curNode = GetCurrentNode(openNodes);
+            OldNode curNode = GetCurrentNode(openNodes);
             closedNodes.Add(curNode);
 
             //마지막 부분. 길을 다 찾은 상태라면
@@ -81,7 +81,7 @@ public class SeekAI : AIBase
         }
     }
 
-    void CheckAddToOpenNodes(Vector2Int checkPos, Node curNode, Vector2Int targetPos)
+    void CheckAddToOpenNodes(Vector2Int checkPos, OldNode curNode, Vector2Int targetPos)
     {
         //벽인 경우
         if (WorldMaker.Instance.IsWall(checkPos))
@@ -94,7 +94,7 @@ public class SeekAI : AIBase
             WorldMaker.Instance.IsWall(new Vector2Int(curNode.pos.x, checkPos.y)))
             return;
 
-        Node n = GetNodeExist(checkPos, openNodes);
+        OldNode n = GetNodeExist(checkPos, openNodes);
         if (n == null)
             n = GetNewNode(checkPos.x, checkPos.y);
 
@@ -111,12 +111,15 @@ public class SeekAI : AIBase
         }
     }
 
+    //
     bool IsDiagonal(Vector2Int a, Vector2Int b)
     {
         return (a.x != b.x && a.y != b.y);
     }
+    //
 
-    Node GetNodeExist(Vector2Int pos, List<Node> nodes)
+    //
+    OldNode GetNodeExist(Vector2Int pos, List<OldNode> nodes)
     {
         for (int i = 0; i < nodes.Count; i++)
         {
@@ -125,12 +128,14 @@ public class SeekAI : AIBase
         }
         return null;
     }
-
-    Node GetCurrentNode(List<Node> nodes)
+    //
+    
+    //
+    OldNode GetCurrentNode(List<OldNode> nodes)
     {
         if (nodes.Count == 0)
             return null;
-        Node result = nodes[0];
+        OldNode result = nodes[0];
         for (int i = 0; i < nodes.Count; i++)
         {
             if (nodes[i].F <= result.F && nodes[i].H < result.H)
@@ -139,6 +144,7 @@ public class SeekAI : AIBase
         nodes.Remove(result);
         return result;
     }
+    //
 
     public void SetTargetTf(Transform _target)
     {
@@ -148,13 +154,14 @@ public class SeekAI : AIBase
     public override void Initialize(GameObject who)
     {
         mh = who.GetComponent<MoveHandler>();
-        openNodes = new List<Node>();
-        closedNodes = new List<Node>();
-        nodePool = new List<Node>();
-        path = new List<Node>();
+        openNodes = new List<OldNode>();
+        closedNodes = new List<OldNode>();
+        nodePool = new List<OldNode>();
+        path = new List<OldNode>();
         InitNodeList();
     }
 
+    //
     void InitNodeList()
     {
         for (int i = 0; i < openNodes.Count; i++)
@@ -185,10 +192,12 @@ public class SeekAI : AIBase
         }
         path.Clear();
     }
+    //
 
-    Node GetNewNode(int x, int y)
+    //
+    OldNode GetNewNode(int x, int y)
     {
-        Node n;
+        OldNode n;
         if (nodePool.Count > 0)
         {
             n = nodePool[0];
@@ -199,11 +208,12 @@ public class SeekAI : AIBase
         }
         else
         {
-            n = new Node(x, y);
+            n = new OldNode(x, y);
         }
 
         return n;
     }
+    //
 
     int GetH(Vector2Int origin, Vector2Int target)
     {
@@ -227,14 +237,14 @@ public class SeekAI : AIBase
 }
 
 [System.Serializable]
-class Node
+class OldNode
 {
-    public Node(int x, int y)
+    public OldNode(int x, int y)
     {
         this.x = x;
         this.y = y;
     }
-    public Node parent;
+    public OldNode parent;
     public int x, y, G, H;
     public int F { get { return G + H; } }
     public void Init()
@@ -248,3 +258,10 @@ class Node
     }
 }
 
+public class ChaseAI : SeekAI
+{
+    public new void Arrive(GameObject who)
+    {
+
+    }
+}

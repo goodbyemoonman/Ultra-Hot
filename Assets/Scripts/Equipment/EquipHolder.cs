@@ -40,6 +40,8 @@ public class EquipHolder : MonoBehaviour {
 
     public void EKeyDown()
     {
+        if (IsEquipSomethig())
+            return;
         if (CheckItem(boundary) == false)
             return;
 
