@@ -5,13 +5,15 @@ using UnityEngine;
 public class MoveHandler : MonoBehaviour {
     Rigidbody2D rgbd;
     bool sw = true;
-    readonly float speed = 2f;  //1초에 2Unit 이동합니다.
+    float speed = 2f;  //1초에 2Unit 이동합니다.
     Vector2 prePos;
 
     private void Awake()
     {
         rgbd = GetComponent<Rigidbody2D>();
         GetComponent<HealthManager>().StateTeller += StateObserver;
+        if (gameObject.layer == Utility.EnemyLayer)
+            speed = 1.2f;
     }
 
     private void OnEnable()
@@ -31,8 +33,7 @@ public class MoveHandler : MonoBehaviour {
             sw = true;
         }
     }
-
-
+    
     public void MoveToWorldDirection(Vector2 dir)
     {
         if (sw == false)
@@ -107,5 +108,10 @@ public class MoveHandler : MonoBehaviour {
     public void LookAt(float angle)
     {
         gameObject.transform.eulerAngles = new Vector3(0, 0, angle);
+    }
+
+    public void StopMove()
+    {
+        rgbd.velocity = Vector2.zero;
     }
 }

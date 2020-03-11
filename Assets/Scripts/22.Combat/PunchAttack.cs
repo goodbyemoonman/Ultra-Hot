@@ -5,19 +5,27 @@ using UnityEngine;
 public class PunchAttack : AttackBase {
     public GameObject punchR;
     public GameObject punchL;
+    bool sw;
 
     private void Awake()
     {
-        cooltime = 0.2f;
-        range = 1.5f;
+        sw = false;
+        cooltime = 0.5f;
+        range = 0.8f;
     }
 
     protected override void Execute()
     {
-        if (punchR.activeInHierarchy)
+        if (sw)
+        {
             punchL.SetActive(true);
+            sw = false;
+        }
         else
+        {
             punchR.SetActive(true);
+            sw = true;
+        }
     }
 
     public override void ThrowThisObj()
@@ -26,9 +34,20 @@ public class PunchAttack : AttackBase {
 
     protected override void ExecuteEnemy()
     {
-        if (punchL.activeInHierarchy)
-            punchR.SetActive(true);
-        else
+        if (sw)
+        {
             punchL.SetActive(true);
+            sw = false;
+        }
+        else
+        {
+            punchR.SetActive(true);
+            sw = true;
+        }
+    }
+
+    public override bool EnoughBullet()
+    {
+        return true;
     }
 }

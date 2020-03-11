@@ -12,12 +12,11 @@ public class PunchMove : MonoBehaviour {
 
     private void Awake()
     {
-        string target;
         if (isPlayer)
-            target = "EnemyCharacter";
+            targetLayer = (1 << LayerMask.NameToLayer("EnemyCharacter"));
         else
-            target = "PlayerCharacter";
-        targetLayer = (1 << LayerMask.NameToLayer(target));
+            targetLayer = (1 << LayerMask.NameToLayer("PlayerCharacter"));
+        
         tr = GetComponent<TrailRenderer>();
         parent = transform.parent;
         originPos = transform.localPosition;

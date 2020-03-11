@@ -73,12 +73,12 @@ public class SeekAlgorithm {
 
     void CheckAddToOpenNodes(Vector2Int checkCrd, Node curNode, Vector2Int goal)
     {
-        if (IsWall(checkCrd))
+        if (Utility.IsWall(checkCrd))
             return;
         if (FindNodeWithCrd(checkCrd, closedNodes) != null)
             return;
-        if (IsWall(new Vector2Int(checkCrd.x, curNode.coord.y)) ||
-            IsWall(new Vector2Int(curNode.coord.x, checkCrd.y)))
+        if (Utility.IsWall(new Vector2Int(checkCrd.x, curNode.coord.y)) ||
+            Utility.IsWall(new Vector2Int(curNode.coord.x, checkCrd.y)))
             return;
 
         Node n = FindNodeWithCrd(checkCrd, openNodes);
@@ -156,28 +156,55 @@ public class SeekAlgorithm {
         }
 
     }
-
-    bool IsWall(Vector2Int crd)
+    
+    public List<Vector2> GetPath(Vector3 start, Vector3 goal)
     {
-        int wallLayer = 1 << LayerMask.NameToLayer("Wall");
-        if (Physics2D.OverlapCircle(crd, 0.4f, wallLayer))
-            return true;
-        return
-            false;
-    }
+        seek(Utility.V3ToV2I(start), Utility.V3ToV2I(goal));
 
-    public List<Vector2Int> GetPath(Vector2Int start, Vector2Int goal)
-    {
-        seek(start, goal);
-
-        List<Vector2Int> result = new List<Vector2Int>();
+        List<Vector2> result = new List<Vector2>();
 
         for(int i = 0;i < finalPath.Count; i++)
         {
             result.Add(finalPath[i].coord);
         }
+        result.Insert(0, start);
+        result[result.Count - 1] = goal;
+        result = PrettyPath(result);
+        return result;
+    }
+
+    List<Vector2> PrettyPath(List<Vector2> path)
+    {
+        if (path.Count < 3)
+            return path;
+        List<Vector2> result = new List<Vector2>();
+        result.Add(path[0]);
+        path.Remove(path[0]);
+        while (path.Count != 0)
+        {
+            for (int i = path.Count - 1; i >= 0; i--)
+            {
+                if(i == 0)
+                {
+                    result.Add(path[0]);
+                    path.Remove(path[0]);
+                    break;
+                }
+                else if (CanMove(result[result.Count - 1], path[i]))
+                {
+                    result.Add(path[i]);
+                    path.RemoveRange(0, i + 1);
+                    break;
+                }
+            }
+        }
 
         return result;
+    }
+
+    bool CanMove(Vector2 start, Vector2 end)
+    {
+        return !Physics2D.CircleCast(start, 0.4f, end - start, (end - start).magnitude, Utility.WallLayer);
     }
 }
 
@@ -196,5 +223,137 @@ class Node
         coord = Vector2Int.zero;
         G = H = 0;
         parent = null;
+    }
+}
+
+public class BoundaryCheckAlgorithm
+{
+    Collider2D[] CheckBoundary(GameObject who, float radius, int layer)
+    {
+        return Physics2D.OverlapCircleAll(who.transform.position, radius, layer);
+    }
+
+    List<GameObject> ArrayToList(Collider2D[] cols, GameObject who)
+    {
+        List<GameObject> result = new List<GameObject>();
+
+        for(int i = 0; i < cols.Length; i++)
+        {
+            //두 물체 사이에 벽이 없으면서
+            //if(Utility.IsBlockWith(
+            //    cols[i].transform.position,
+            //    who.transform.position, Utility.WallLayer) == false)
+            //{
+            //    //who가 물체방향을 바라보는 것들만
+            //    if (Utility.IsLookAt(who, cols[i].transform.position))
+            result.Add(cols[i].gameObject);
+            //}
+        }
+
+        return result;
+    }
+
+    void QuickSortByDistance(List<GameObject> gos, Vector3 center)
+    {
+        GameObject tmp;
+        int pivot;
+        Stack<Vector2Int> lvrvs = new Stack<Vector2Int>();
+
+        CheckPushNewLvRv(lvrvs, 0, gos.Count - 1, gos, center);
+        while (lvrvs.Count > 0)
+        {
+            Vector2Int lvrv = lvrvs.Pop();
+            pivot = lvrv.x;
+            int lv = pivot + 1;
+            int rv = lvrv.y;
+
+            while (lv < rv)
+            {
+                //pivot보다 큰 값까지 lv를 우측으로 이동
+                while (
+                    IsRightFartherThanLeft(
+                        gos[lv].transform.position,
+                        gos[pivot].transform.position, center)
+                    &&
+                    lv < rv
+                    )
+                {
+                    lv++;
+                }
+                //pivot보다 작은 값까지 rv를 좌측으로 이동
+                while (
+                    IsRightFartherThanLeft(
+                        gos[pivot].transform.position,
+                        gos[rv].transform.position, center)
+                    &&
+                    lv <= rv)
+                {
+                    rv--;
+                }
+
+                //
+                if (lv < rv)
+                {
+                    tmp = gos[rv];
+                    gos[rv] = gos[lv];
+                    gos[lv] = tmp;
+                }
+            }
+            tmp = gos[pivot];
+            gos[pivot] = gos[rv];
+            gos[rv] = tmp;
+
+            CheckPushNewLvRv(lvrvs, lvrv.x, rv - 1, gos, center);
+            CheckPushNewLvRv(lvrvs, lv, lvrv.y, gos, center);
+
+        }
+    }
+
+    bool IsRightFartherThanLeft(Vector3 lv, Vector3 rv, Vector3 center)
+    {
+        if ((lv - center).magnitude < (rv - center).magnitude)
+            return true;
+        else
+            return false;
+    }
+
+    void CheckPushNewLvRv(Stack<Vector2Int> lvrvs, int lv, int rv, List<GameObject> gos, Vector3 center)
+    {
+        if (rv - lv + 1 > 2)
+            lvrvs.Push(new Vector2Int(lv, rv));
+        else if (rv - lv + 1 == 2)
+        {
+            if (IsRightFartherThanLeft(
+                gos[rv].transform.position,
+                gos[lv].transform.position, center))
+            {
+                GameObject tmp = gos[rv];
+                gos[rv] = gos[lv];
+                gos[lv] = tmp;
+            }
+        }
+
+    }
+
+    List<GameObject> CutOffAlreadyEquiped(List<GameObject> gos)
+    {
+        List<GameObject> result = new List<GameObject>();
+        for(int i = 0; i < gos.Count; i++)
+        {
+            if (gos[i].transform.parent == null)
+                result.Add(gos[i]);
+        }
+
+        return result;
+    }
+
+    public List<GameObject> GetObjListInSight(GameObject who, float radius, int layer)
+    {
+        List<GameObject> result = ArrayToList(CheckBoundary(who, radius, layer), who);
+
+        QuickSortByDistance(result, who.transform.position);
+        result = CutOffAlreadyEquiped(result);
+
+        return result;
     }
 }

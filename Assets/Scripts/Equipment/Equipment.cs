@@ -61,6 +61,7 @@ public class Equipment : MonoBehaviour {
     {
         rgbd.AddForce(new Vector2(Random.Range(-3f, 3f), Random.Range(-3f, 3f)) * 5f);
         yield return null;
+        gameObject.SetActive(false);
     }
 
     public void ThrowHelper(Vector3 targetPos, Vector2 dir, bool isBlocked)
@@ -71,7 +72,6 @@ public class Equipment : MonoBehaviour {
 
     IEnumerator ThrowMovement(Vector3 targetPos, Vector2 dir, bool isBlocked)
     {
-        gameObject.layer = LayerMask.NameToLayer("EquipItem");
         Vector3 originPos = transform.position;
         for (float t = 0; t < 1; t += 0.2f)
         {

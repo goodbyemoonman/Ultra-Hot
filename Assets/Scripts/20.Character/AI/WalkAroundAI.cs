@@ -2,150 +2,240 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class WalkAroundAI : AIBase
+public class WalkAroundAI : iAI
 {
-    Dir toMoveDir;
-    float t;
-    Vector2 originPos;
+    enum DirList { None,
+        Right, Left, Forward, Backward }
+    enum WorldDirList { None,
+        Down, Up, Right, Left }
+    readonly Vector2Int[] dirs = {Vector2Int.zero,
+        Vector2Int.down, Vector2Int.up, Vector2Int.right, Vector2Int.left };
+    readonly float[] angles = { 0f,
+        -90f, 90f, 0f, 180f };
+    GameObject who;
+    AIHolder ah;
+    EquipHolder eh;
+    MoveHandler mh;
+    WorldDirList dirNow;
+    bool sw;
 
-    public override void Initialize(GameObject who)
+    BoundaryCheckAlgorithm bca;
+
+    public WalkAroundAI(BoundaryCheckAlgorithm b, GameObject w)
     {
+        who = w;
+        ah = who.GetComponent<AIHolder>();
+        eh = who.GetComponent<EquipHolder>();
         mh = who.GetComponent<MoveHandler>();
-        toMoveDir = DetectLongDir(who);
-        LookAt(toMoveDir, who);
-        ToIntPos(who);
-        t = 0;
-        originPos = who.transform.position;
-    }
 
-    public override void Do(GameObject who)
-    {
-        MoveCommand(who);
-        if ((originPos - (Vector2)who.transform.position).magnitude >= 1 || t > 1f)
-        {
-            ToIntPos(who);
-            t = 0;
-            toMoveDir = CheckLRF(who);
-            LookAt(toMoveDir, who);
-            originPos = who.transform.position;
-            if(FindClosestEquipment(who) != null)
-            {
-                holder.Seek(FindClosestEquipment(who).transform);
-                //현재 AI 추적으로 변경
-            }
-        }
-        t += Time.deltaTime;
+        bca = b;
+        dirNow = WorldDirList.None;
+        sw = true;
     }
-
-    Dir DetectLongDir(GameObject who)
+    
+    WorldDirList DetectLongDir()
     {
         float distance;
-        Dir result;
+        WorldDirList result;
         RaycastHit2D hit;
         hit = Physics2D.Raycast(
-            who.transform.position, Vector2.down, 10f,
-            1 << LayerMask.NameToLayer("Wall"));
+            who.transform.position, dirs[(int)WorldDirList.Right], 10f,
+            Utility.WallLayer);
 
-        result = Dir.RIGHT;
+        result = WorldDirList.Right;
         if (!hit)
-        {
             distance = 10f;
-        }
         else
-        {
             distance = (hit.point - (Vector2)who.transform.position).magnitude;
-        }
 
         hit = Physics2D.Raycast(
-            who.transform.position, Vector2.up, 10f,
-            1 << LayerMask.NameToLayer("Wall"));
+            who.transform.position, dirs[(int)WorldDirList.Left], 10f,
+            Utility.WallLayer);
         if (hit)
         {
             if (distance < (hit.point - (Vector2)who.transform.position).magnitude)
             {
                 distance = (hit.point - (Vector2)who.transform.position).magnitude;
-                result = Dir.LEFT;
+                result = WorldDirList.Left;
             }
         }
         else
         {
             distance = 10f;
-            result = Dir.LEFT;
+            result = WorldDirList.Left;
         }
 
         hit = Physics2D.Raycast(
-            who.transform.position, Vector2.right, 10f,
-            1 << LayerMask.NameToLayer("Wall"));
+            who.transform.position, dirs[(int)WorldDirList.Up], 10f,
+            Utility.WallLayer);
         if (hit)
         {
             if (distance < (hit.point - (Vector2)who.transform.position).magnitude)
             {
                 distance = (hit.point - (Vector2)who.transform.position).magnitude;
-                result = Dir.FORWARD;
+                result = WorldDirList.Up;
             }
-
         }
         else
         {
             distance = 10f;
-            result = Dir.FORWARD;
+            result = WorldDirList.Up;
         }
 
         hit = Physics2D.Raycast(
-            who.transform.position, Vector2.left, 10f,
-            1 << LayerMask.NameToLayer("Wall"));
+            who.transform.position, dirs[(int)WorldDirList.Down], 10f,
+            Utility.WallLayer);
         if (hit)
         {
             if (distance < (hit.point - (Vector2)who.transform.position).magnitude)
             {
                 distance = (hit.point - (Vector2)who.transform.position).magnitude;
-                result = Dir.BACKWARD;
+                result = WorldDirList.Down;
             }
         }
         else
         {
             distance = 10f;
-            result = Dir.BACKWARD;
+            result = WorldDirList.Down;
         }
 
         return result;
     }
 
-    void ToIntPos(GameObject who)
+    DirList CheckNextSelfDirection()
     {
-        who.transform.position = new Vector3(
-            Mathf.RoundToInt(who.transform.position.x),
-            Mathf.RoundToInt(who.transform.position.y), 0);
-    }
-
-    Dir CheckLRF(GameObject who)
-    {
-        List<Dir> dirs = new List<Dir>();
-        if (CanMoveTo(who, Dir.FORWARD))
+        List<DirList> results = new List<DirList>();
+        if (CanMoveToSlefDirection(who, dirs[(int)DirList.Forward]))
         {
-            dirs.Add(Dir.FORWARD);
-            dirs.Add(Dir.FORWARD);
+            results.Add(DirList.Forward);
+            results.Add(DirList.Forward);
         }
-        if (CanMoveTo(who, Dir.LEFT))
-            dirs.Add(Dir.LEFT);
-        if (CanMoveTo(who, Dir.RIGHT))
-            dirs.Add(Dir.RIGHT);
+        if (CanMoveToSlefDirection(who, dirs[(int)DirList.Left]))
+            results.Add(DirList.Left);
+        if (CanMoveToSlefDirection(who, dirs[(int)DirList.Right]))
+            results.Add(DirList.Right);
 
-        Dir result;
+        DirList result;
 
-        if (dirs.Count != 0)
+        if (results.Count != 0)
         {
-            result = dirs[Random.Range(0, dirs.Count - 1)];
+            result = results[Random.Range(0, results.Count - 1)];
         }
         else
-            result = Dir.BACKWARD;
+            result = DirList.Backward;
 
         return result;
     }
-
-    void SightObjCheck(GameObject who)
+   
+    bool CanMoveToSlefDirection(GameObject who, Vector2 dir)
     {
-        GameObject obj = FindClosestObjInSight(who);
+        float angle = who.transform.eulerAngles.z * Mathf.Deg2Rad;
+        float cos = Mathf.Cos(angle);
+        float sin = Mathf.Sin(angle);
+        Vector2 checkDir = new Vector2(cos * dir.x - sin * dir.y, sin * dir.x + cos * dir.y);
+        RaycastHit2D hit = Physics2D.Linecast(who.transform.position, 
+            (Vector2)who.transform.position + checkDir, Utility.WallLayer);
+        Debug.DrawLine(who.transform.position, 
+            (Vector2)who.transform.position + checkDir, Color.blue, 1f);
+        if (!hit)
+            return true;
+        else
+            return false;
+    }
 
+    public bool Check()
+    {
+        if(dirNow == WorldDirList.None)
+        {
+            dirNow = DetectLongDir();
+        }
+        int targetLayer;
+        if (eh.IsEquipSomethig())
+            targetLayer = Utility.PlayerLayer;
+        else
+            targetLayer = Utility.PlayerLayer | Utility.EquipmentLayer;
+
+        List<GameObject> objs = bca.GetObjListInSight(who, 8f, targetLayer);
+
+        if(objs.Count != 0)
+        {
+            if (objs[0].CompareTag("Player"))
+                ah.SetAI(AIHolder.AIList.ChasePlayer);
+            else
+                ah.SetAI(AIHolder.AIList.ChaseEquip);
+            return false;
+        }
+
+        //round된 좌표와 현재 좌표의 차이가 0.1 이하일 때 방향검사하여 방향 바꿔줌.
+        Vector2 v = Utility.V3ToV2I(who.transform.position);
+        if(((Vector2)who.transform.position - v).magnitude < 0.1f && sw)
+        {
+            DirList dir = CheckNextSelfDirection();
+            dirNow = GetWorldDir(dirNow, dir);
+            sw = false;
+        }
+        else if(((Vector2)who.transform.position - v).magnitude > 0.5f)
+            sw = true;
+
+        return true;
+    }
+
+    WorldDirList GetWorldDir(WorldDirList origin, DirList rotate)
+    {
+        if (rotate == DirList.Forward)
+            return origin;
+
+        if (rotate == DirList.Backward)
+        {
+            switch (origin)
+            {
+                case WorldDirList.Down:
+                    return WorldDirList.Up;
+                case WorldDirList.Up:
+                    return WorldDirList.Down;
+                case WorldDirList.Right:
+                    return WorldDirList.Left;
+                case WorldDirList.Left:
+                    return WorldDirList.Right;
+            }
+        }
+
+        if(rotate == DirList.Left)
+        {
+            switch (origin)
+            {
+                case WorldDirList.Down:
+                    return WorldDirList.Right;
+                case WorldDirList.Right:
+                    return WorldDirList.Up;
+                case WorldDirList.Up:
+                    return WorldDirList.Left;
+                case WorldDirList.Left:
+                    return WorldDirList.Down;
+            }
+        }
+
+        if(rotate == DirList.Right)
+        {
+            switch (origin)
+            {
+                case WorldDirList.Up:
+                    return WorldDirList.Right;
+                case WorldDirList.Right:
+                    return WorldDirList.Down;
+                case WorldDirList.Down:
+                    return WorldDirList.Left;
+                case WorldDirList.Left:
+                    return WorldDirList.Up;
+            }
+        }
+
+        return WorldDirList.None;
+    }
+
+    public void Do()
+    {
+        mh.LookAt(angles[(int)dirNow]);
+        mh.MoveToWorldDirection(dirs[(int)dirNow]);
     }
 }

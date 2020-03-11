@@ -3,44 +3,46 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class AIHolder : MonoBehaviour {
-    public Transform tf;
-    WalkAroundAI walkAroundAI;
-    SeekAI seekAI;
-    AIBase AINow;
+    public enum AIList { WalkAround, ChasePlayer, ChaseEquip }
+
+    BoundaryCheckAlgorithm bca;
+    SeekAlgorithm sa;
+    ChasePlayerAI cpAI;
+    ChaseEquipAI ceAI;
+    WalkAroundAI waAI;
+
+    iAI aiNow;
 
     private void Awake()
     {
-        walkAroundAI = new WalkAroundAI();
-        walkAroundAI.Initialize(gameObject);
-        walkAroundAI.SetHoler(this);
-        seekAI = new SeekAI();
-        seekAI.Initialize(gameObject);
-        seekAI.SetHoler(this);
+        bca = new BoundaryCheckAlgorithm();
+        sa = new SeekAlgorithm();
+        cpAI = new ChasePlayerAI(bca, sa, gameObject);
+        ceAI = new ChaseEquipAI(bca, sa, gameObject);
+        waAI = new WalkAroundAI(bca, gameObject);
+        aiNow = waAI;
     }
 
-    private void OnEnable()
+    public void SetAI(AIList ai)
     {
-        Seek(tf);
+        Debug.Log("switch AI to " + ai);
+        switch (ai)
+        {
+            case AIList.WalkAround:
+                aiNow = waAI;
+                break;
+            case AIList.ChaseEquip:
+                aiNow = ceAI;
+                break;
+            case AIList.ChasePlayer:
+                aiNow = cpAI;
+                break;
+        }
     }
 
     private void Update()
     {
-        AINow.Do(gameObject);
-    }
-
-    public void Seek(Transform tf)
-    {
-        seekAI.SetTargetTf(tf);
-        AINow = seekAI;
-    }
-
-    public void RunOutBullet()
-    {
-        gameObject.SendMessage("Throw");
-    }
-
-    public void Arrive()
-    {
-        seekAI.Arrive(gameObject);
+        if (aiNow.Check())
+            aiNow.Do();
     }
 }

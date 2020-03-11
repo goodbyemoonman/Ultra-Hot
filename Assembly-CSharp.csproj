@@ -72,6 +72,7 @@
     <Compile Include="Assets\Scripts\20.Character\AI\AIHolder.cs" />
     <Compile Include="Assets\Scripts\20.Character\AI\Algorithms.cs" />
     <Compile Include="Assets\Scripts\20.Character\AI\ChaseEquipAI.cs" />
+    <Compile Include="Assets\Scripts\20.Character\AI\ChasePlayerAI.cs" />
     <Compile Include="Assets\Scripts\20.Character\AI\iAI.cs" />
     <Compile Include="Assets\Scripts\20.Character\AI\SeekAI.cs" />
     <Compile Include="Assets\Scripts\20.Character\AI\WalkAroundAI.cs" />
@@ -95,6 +96,7 @@
     <Compile Include="Assets\Scripts\Utility\Singleton.cs" />
     <Compile Include="Assets\Scripts\Utility\Test2.cs" />
     <Compile Include="Assets\Scripts\Utility\TestScript.cs" />
+    <Compile Include="Assets\Scripts\Utility\Utility.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro_Properties.cginc" />

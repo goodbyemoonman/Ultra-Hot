@@ -84,4 +84,9 @@ public class PistolAttack : AttackBase {
         bullet.transform.SetParent(null);
         bullet.SetActive(true);
     }
+
+    public override bool EnoughBullet()
+    {
+        return (bulletCount > 0);
+    }
 }

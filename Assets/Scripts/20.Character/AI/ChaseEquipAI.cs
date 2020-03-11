@@ -4,215 +4,83 @@ using UnityEngine;
 
 public class ChaseEquipAI : iAI
 {
-    SeekAlgorithm sa;
-    GameObject target;
-    List<Vector2Int> path;
+    GameObject who;
+    AIHolder ah;
+    EquipHolder eh;
+    MoveHandler mh;
 
-    public ChaseEquipAI()
+    BoundaryCheckAlgorithm bca;
+    SeekAlgorithm sa;
+    List<Vector2> path;
+    GameObject target;
+
+    public ChaseEquipAI(BoundaryCheckAlgorithm b, SeekAlgorithm s, GameObject who)
     {
-        sa = new SeekAlgorithm();
-        path = new List<Vector2Int>();
+        bca = b;
+        sa = s;
+        path = new List<Vector2>();
+        this.who = who;
+        ah = who.GetComponent<AIHolder>();
+        eh = who.GetComponent<EquipHolder>();
+        mh = who.GetComponent<MoveHandler>();
     }
 
-    public void Check(GameObject who)
+    public bool Check()
     {
-        int layer = 1 << LayerMask.NameToLayer("EquipItem");
-        if (who.GetComponent<EquipHolder>().IsEquipSomethig())
+        if (eh.IsEquipSomethig())
         {   //이미 무기를 착용 중
-            //AI 변경해야됨.
+            ah.SetAI(AIHolder.AIList.WalkAround);
+            return false;
         }
 
-        if ((who.transform.position - target.transform.position).magnitude <= 0.5f)
-        {   //무기에 접근.
-            who.SendMessage("EKeyDown");
-            //AI 변경해야됨.
-        }
-
-        if (path.Count == 0)
-        {   //길이 없다면 생성
-            path = sa.GetPath(V3Tov2I(who.transform.position), V3Tov2I(target.transform.position));
-        }
-
-        if ((who.transform.position - new Vector3(path[0].x, path[0].y)).magnitude < 0.1f)
-        {   //해당 위치까지 이동
-            path.Remove(path[0]);
-        }
-
-        List<GameObject> gos = CutOffOutOfSight(
-            CheckBoundary(who, 5f, layer), who);
-        SortByDistance(gos, who.transform.position);
-        CutOffAlreadyEquiped(gos);
-
+        //새로운 타겟 Equipment 탐색.
+        List<GameObject> gos = bca.GetObjListInSight(who, 8f, Utility.EquipmentLayer | Utility.PlayerLayer);
         if (gos.Count == 0)
-            return;
-
-        if(gos[0] != target)
+        {
+            ah.SetAI(AIHolder.AIList.WalkAround);
+            return false;
+        }
+        else if (gos[0].layer == Utility.PlayerLayer)
+        {
+            ah.SetAI(AIHolder.AIList.ChasePlayer);
+            return false;
+        }
+        else if (gos[0] != target)
         {
             target = gos[0];
-            path = sa.GetPath(V3Tov2I(who.transform.position), V3Tov2I(target.transform.position));
         }
 
-    }
-
-    public void Do(GameObject who)
-    {
-        who.GetComponent<MoveHandler>().MoveToWorldPosition(path[0]);
-    }
-
-    Collider2D[] CheckBoundary(GameObject who, float radius, int layer)
-    {
-        return Physics2D.OverlapCircleAll(who.transform.position, radius, layer);
-    }
-
-    List<GameObject> CutOffOutOfSight(Collider2D[] cols, GameObject who)
-    {
-        List<GameObject> result = new List<GameObject>();
-
-        for (int i = 0; i < cols.Length; i++)
-        {
-            if (IsBlockedWithWall(
-                cols[i].transform.position,
-                who.transform.position,
-                1 << LayerMask.NameToLayer("Wall")) == false)
-            {
-                if (IsLookAt(who, cols[i].transform.position))
-                {
-                    result.Add(cols[i].gameObject);
-                }
-
-            }
-        }
-
-        return result;
-    }
-
-    void SortByDistance(List<GameObject> gos, Vector3 center)
-    {
-        GameObject tmp;
-        int pivot;
-        Stack<Vector2Int> lvrvs = new Stack<Vector2Int>();
-
-        CheckPushNewLvRv(lvrvs, 0, gos.Count - 1, gos, center);
-        while (lvrvs.Count > 0)
-        {
-            Vector2Int lvrv = lvrvs.Pop();
-            pivot = lvrv.x;
-            int lv = pivot + 1;
-            int rv = lvrv.y;
-
-            while (lv < rv)
-            {
-                //pivot보다 큰 값까지 lv를 우측으로 이동
-                while (
-                    IsRightBiggerThanLeft(
-                        gos[lv].transform.position,
-                        gos[pivot].transform.position, center)
-                    &&
-                    lv < rv
-                    )
-                {
-                    lv++;
-                }
-                //pivot보다 작은 값까지 rv를 좌측으로 이동
-                while (
-                    IsRightBiggerThanLeft(
-                        gos[pivot].transform.position,
-                        gos[rv].transform.position, center)
-                    &&
-                    lv <= rv)
-                {
-                    rv--;
-                }
-
-                //
-                if (lv < rv)
-                {
-                    tmp = gos[rv];
-                    gos[rv] = gos[lv];
-                    gos[lv] = tmp;
-                }
-            }
-            tmp = gos[pivot];
-            gos[pivot] = gos[rv];
-            gos[rv] = tmp;
-
-            CheckPushNewLvRv(lvrvs, lvrv.x, rv - 1, gos, center);
-            CheckPushNewLvRv(lvrvs, lv, lvrv.y, gos, center);
-        }
-    }
-
-    void CutOffAlreadyEquiped(List<GameObject> gos)
-    {
-        foreach(GameObject go in gos.ToArray())
-        {
-            if (go.transform.parent != null)
-                gos.Remove(go);
-        }
-    }
-
-    bool IsRightBiggerThanLeft(Vector3 lv, Vector3 rv, Vector3 center)
-    {
-        if ((lv - center).magnitude < (rv - center).magnitude)
-            return true;
-        else
+        //타겟 Euipqment 에 접근?
+        if ((who.transform.position - target.transform.position).magnitude <= 0.5f)
+        {   
+            eh.EKeyDown();
+            ah.SetAI(AIHolder.AIList.WalkAround);
             return false;
-    }
-
-    void CheckPushNewLvRv(Stack<Vector2Int> lvrvs, int lv, int rv, List<GameObject> gos, Vector3 center)
-    {
-        if (rv - lv + 1 > 2)
-            lvrvs.Push(new Vector2Int(lv, rv));
-        else if(rv - lv + 1 == 2)
-        {
-            if(IsRightBiggerThanLeft(
-                gos[rv].transform.position,
-                gos[lv].transform.position, center))
-            {
-                GameObject tmp = gos[rv];
-                gos[rv] = gos[lv];
-                gos[lv] = tmp;
-            }
         }
 
-    }
+        path = sa.GetPath(
+            (who.transform.position),
+            (target.transform.position));
 
-    bool IsBlockedWithWall(Vector3 v1, Vector3 v2, int layer)
-    {
-        RaycastHit2D hit = Physics2D.Linecast(v1, v2, layer);
-        if (hit)
-            return true;
-        else
+        if (path.Count > 0 && 
+            (who.transform.position - new Vector3(path[0].x, path[0].y)).magnitude < 0.1f)
+        {
+            path.RemoveAt(0);
+        }
+
+        //맨처음에 현재 위치 넣는것때문에 그런듯.. 반올림을 찾아가버리노..
+
+        if (path.Count == 0)
+        {
+            ah.SetAI(AIHolder.AIList.WalkAround);
             return false;
+        }
 
+        return true;
     }
 
-    bool IsLookAt(GameObject who, Vector3 target)
+    public void Do()
     {
-        Vector3 pos = target - who.transform.position;
-        Vector2 dir;
-
-        float sin = Mathf.Sin(who.transform.eulerAngles.z * Mathf.Deg2Rad);
-        float cos = Mathf.Cos(who.transform.eulerAngles.z * Mathf.Deg2Rad);
-
-        dir.x = cos;
-        dir.y = sin;
-
-        float angle = Vector2.SignedAngle(dir, pos);
-
-        if (Mathf.Cos(angle * Mathf.Deg2Rad) > 0)
-            return true;
-        else
-            return false;
-
-    }
-
-    public void SetTarget(GameObject target)
-    {
-        this.target = target;
-    }
-
-    Vector2Int V3Tov2I(Vector3 v)
-    {
-        return new Vector2Int(Mathf.RoundToInt(v.x), Mathf.RoundToInt(v.y));
+       mh.MoveToWorldPosition(path[0]);
     }
 }

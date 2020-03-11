@@ -11,7 +11,8 @@ public abstract class AttackBase : MonoBehaviour {
 
     public void Init()
     {
-        isCooldown = false;
+        isCooldown = true;
+        StartCoroutine(Timer(0.25f));
     }
 
     public virtual void TryExecute()
@@ -46,7 +47,7 @@ public abstract class AttackBase : MonoBehaviour {
         if (parentLayer == LayerMask.NameToLayer("PlayerCharacter"))
             yield return new WaitForSecondsRealtime(duration);
         else
-            yield return new WaitForSeconds(duration);
+            yield return new WaitForSeconds(duration * 1.5f);
         RefreshCooldown();
     }
     
@@ -59,4 +60,8 @@ public abstract class AttackBase : MonoBehaviour {
     {
         parentLayer = layer;
     }
+
+    public float AtkRange { get { return range; } }
+
+    public abstract bool EnoughBullet();
 }
