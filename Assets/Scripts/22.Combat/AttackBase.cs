@@ -7,7 +7,7 @@ public abstract class AttackBase : MonoBehaviour {
     protected float range = 1;
     bool isCooldown = false;
     protected int targetLayer;
-    protected int parentLayer;
+    protected bool isUsedPlayer;
 
     public void Init()
     {
@@ -25,7 +25,7 @@ public abstract class AttackBase : MonoBehaviour {
         StopAllCoroutines();
         StartCoroutine(Timer(cooltime));
 
-        if (parentLayer == LayerMask.NameToLayer("PlayerCharacter"))
+        if (isUsedPlayer)
             Execute();
         else
             ExecuteEnemy();
@@ -44,7 +44,7 @@ public abstract class AttackBase : MonoBehaviour {
 
     IEnumerator Timer(float duration)
     {
-        if (parentLayer == LayerMask.NameToLayer("PlayerCharacter"))
+        if (isUsedPlayer)
             yield return new WaitForSecondsRealtime(duration);
         else
             yield return new WaitForSeconds(duration * 1.5f);
@@ -56,9 +56,9 @@ public abstract class AttackBase : MonoBehaviour {
         targetLayer = layer;
     }
 
-    public void SetLayer(int layer)
+    public void PlayerSet(bool isIt)
     {
-        parentLayer = layer;
+        isUsedPlayer = isIt;
     }
 
     public float AtkRange { get { return range; } }

@@ -7,7 +7,6 @@ public class EquipHolder : MonoBehaviour {
     BoundaryCheckAlgorithm bca;
     AttackBase punch;
     FixedJoint2D fxjt2d;
-    MoveHandler mh;
     [SerializeField]
     GameObject EquipObj;
     AttackBase atkNow;
@@ -18,7 +17,6 @@ public class EquipHolder : MonoBehaviour {
 
     private void Awake()
     {
-        mh = GetComponent<MoveHandler>();
         punch = GetComponent<PunchAttack>();
         bca = new BoundaryCheckAlgorithm();
         fxjt2d = GetComponent<FixedJoint2D>();
@@ -30,7 +28,10 @@ public class EquipHolder : MonoBehaviour {
     public void StateObserver(HealthManager.CharacterState state)
     {
         if (state == HealthManager.CharacterState.Sturn)
+        {   //맞으면 무기를 떨어트려
+            Drop();
             canAct = false;
+        }
         else
             canAct = true;
 
@@ -44,7 +45,7 @@ public class EquipHolder : MonoBehaviour {
             return true;
     }
     
-    public void EKeyDown()
+    public void TryEquip()
     {
         if (IsEquipSomethig())
             return;
@@ -95,8 +96,8 @@ public class EquipHolder : MonoBehaviour {
             return;
         UnEquip("ThrowThisObj");
     }
-
-    public void Drop()
+    
+    void Drop()
     {
         if (EquipObj == null)
             return;
@@ -111,21 +112,12 @@ public class EquipHolder : MonoBehaviour {
     public void EnemyAtk()
     {
         if (atkNow.EnoughBullet())
-        {
             TryAttack();
-        }
         else
-            Drop();
-    }
-
-    public Vector2 GetShootPoint()
-    {
-        if (equipNow != null)
         {
-            return EquipObj.GetComponent<PistolAttack>().firePos.position;
+            if (EquipObj == null)
+                return;
+            UnEquip("DestroyThis");
         }
-        else
-            return transform.position;
     }
-    
 }

@@ -3,22 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class PunchMove : MonoBehaviour {
-    Transform parent;
     Vector2 originPos;
     TrailRenderer tr;
     RaycastHit2D[] hits;
-    public bool isPlayer;
+    Transform parent;
     int targetLayer;
 
     private void Awake()
     {
-        if (isPlayer)
+        parent = transform.parent;
+        parent.GetComponent<HealthManager>().StateTeller += StateObserver;
+        if (parent.CompareTag("Player"))
             targetLayer = (1 << LayerMask.NameToLayer("EnemyCharacter"));
         else
             targetLayer = (1 << LayerMask.NameToLayer("PlayerCharacter"));
         
         tr = GetComponent<TrailRenderer>();
-        parent = transform.parent;
         originPos = transform.localPosition;
     }
 
@@ -37,7 +37,7 @@ public class PunchMove : MonoBehaviour {
         for(float t = 0; t < 0.1f; )
         {
             transform.localPosition = Vector2.Lerp(originPos , target, t * 10);
-            if (isPlayer)
+            if (parent.CompareTag("Player"))
             {
                 t += 0.02f;
                 yield return new WaitForSecondsRealtime(0.02f);
@@ -64,5 +64,11 @@ public class PunchMove : MonoBehaviour {
             yield return null;
         }
         gameObject.SetActive(false);
+    }
+
+    void StateObserver(HealthManager.CharacterState state)
+    {
+        if(state == HealthManager.CharacterState.Sturn)
+            gameObject.SetActive(false);
     }
 }

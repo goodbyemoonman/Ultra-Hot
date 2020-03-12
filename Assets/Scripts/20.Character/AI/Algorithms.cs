@@ -167,6 +167,9 @@ public class SeekAlgorithm {
         {
             result.Add(finalPath[i].coord);
         }
+        if (result.Count == 0)
+            return result;
+
         result.Insert(0, start);
         result[result.Count - 1] = goal;
         result = PrettyPath(result);

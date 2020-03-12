@@ -9,8 +9,12 @@ public class PunchAttack : AttackBase {
 
     private void Awake()
     {
+        if (CompareTag("Player"))
+            PlayerSet(true);
+        else
+            PlayerSet(false);
         sw = false;
-        cooltime = 0.5f;
+        cooltime = 0.4f;
         range = 0.8f;
     }
 
@@ -18,11 +22,13 @@ public class PunchAttack : AttackBase {
     {
         if (sw)
         {
+            punchL.SetActive(false);
             punchL.SetActive(true);
             sw = false;
         }
         else
         {
+            punchR.SetActive(false);
             punchR.SetActive(true);
             sw = true;
         }

@@ -5,9 +5,9 @@ using UnityEngine;
 public class ChasePlayerAI : iAI
 {
     GameObject who;
-    AIHolder ah;
-    EquipHolder eh;
-    MoveHandler mh;
+    AIHolder aiHolder;
+    ActHandler atkHandler;
+    MoveHandler moveHandler;
 
     BoundaryCheckAlgorithm bca;
     SeekAlgorithm sa;
@@ -20,15 +20,15 @@ public class ChasePlayerAI : iAI
         sa = s;
         path = new List<Vector2>();
         this.who = who;
-        ah = who.GetComponent<AIHolder>();
-        eh = who.GetComponent<EquipHolder>();
-        mh = who.GetComponent<MoveHandler>();
+        aiHolder = who.GetComponent<AIHolder>();
+        moveHandler = who.GetComponent<MoveHandler>();
+        atkHandler = who.GetComponent<ActHandler>();
     }
 
     public bool Check()
     {
         int targetLayer;
-        if (eh.IsEquipSomethig())
+        if (atkHandler.IsEquipSomething())
             targetLayer = Utility.PlayerLayer;
         else
             targetLayer = Utility.PlayerLayer | Utility.EquipmentLayer;
@@ -37,12 +37,12 @@ public class ChasePlayerAI : iAI
 
         if (gos.Count == 0)
         {
-            ah.SetAI(AIHolder.AIList.WalkAround);
+            aiHolder.SetAI(AIHolder.AIList.Patrol);
             return false;
         }
         else if (gos[0].CompareTag("Equipment"))
         {
-            ah.SetAI(AIHolder.AIList.ChaseEquip);
+            aiHolder.SetAI(AIHolder.AIList.ChaseEquip);
             return false;
         }
         else
@@ -60,7 +60,7 @@ public class ChasePlayerAI : iAI
         
 
         if ((who.transform.position - target.transform.position).magnitude <=
-            eh.GetAtkRange()
+            atkHandler.GetAtkRange()
             && Utility.CanShoot(
                 who.transform.position + new Vector3(0.4f, 0f, 0f),
                 who.transform.position, 
@@ -72,7 +72,7 @@ public class ChasePlayerAI : iAI
 
         if (path.Count == 0)
         {
-            ah.SetAI(AIHolder.AIList.WalkAround);
+            aiHolder.SetAI(AIHolder.AIList.Patrol);
             return false;
         }
 
@@ -82,13 +82,13 @@ public class ChasePlayerAI : iAI
     public void Do()
     {
         if (path.Count > 0)
-            mh.MoveToWorldPosition(path[0]);
+            moveHandler.MoveToWorldPosition(path[0]);
         else
         {
-            mh.StopMove();
+            moveHandler.StopMove();
             float angle = Vector2.SignedAngle(Vector2.right, target.transform.position - who.transform.position);
-            mh.LookAt(angle);
-            eh.EnemyAtk();
+            moveHandler.LookAt(angle);
+            atkHandler.InputEnemyDefaultAtk();
         }
     }
 }

@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class AIHolder : MonoBehaviour {
-    public enum AIList { WalkAround, ChasePlayer, ChaseEquip }
+    public enum AIList { Patrol, ChasePlayer, ChaseEquip }
 
     BoundaryCheckAlgorithm bca;
     SeekAlgorithm sa;
     ChasePlayerAI cpAI;
     ChaseEquipAI ceAI;
-    WalkAroundAI waAI;
+    PatrolAI ptAI;
 
     iAI aiNow;
 
@@ -19,8 +19,8 @@ public class AIHolder : MonoBehaviour {
         sa = new SeekAlgorithm();
         cpAI = new ChasePlayerAI(bca, sa, gameObject);
         ceAI = new ChaseEquipAI(bca, sa, gameObject);
-        waAI = new WalkAroundAI(bca, gameObject);
-        aiNow = waAI;
+        ptAI = new PatrolAI(bca, sa, gameObject);
+        aiNow = ptAI;
     }
 
     public void SetAI(AIList ai)
@@ -28,8 +28,8 @@ public class AIHolder : MonoBehaviour {
         Debug.Log("switch AI to " + ai);
         switch (ai)
         {
-            case AIList.WalkAround:
-                aiNow = waAI;
+            case AIList.Patrol:
+                aiNow = ptAI;
                 break;
             case AIList.ChaseEquip:
                 aiNow = ceAI;

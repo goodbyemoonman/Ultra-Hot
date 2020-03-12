@@ -5,9 +5,9 @@ using UnityEngine;
 public class ChaseEquipAI : iAI
 {
     GameObject who;
-    AIHolder ah;
-    EquipHolder eh;
-    MoveHandler mh;
+    AIHolder aiHolder;
+    ActHandler actHandler;
+    MoveHandler moveHandler;
 
     BoundaryCheckAlgorithm bca;
     SeekAlgorithm sa;
@@ -20,16 +20,16 @@ public class ChaseEquipAI : iAI
         sa = s;
         path = new List<Vector2>();
         this.who = who;
-        ah = who.GetComponent<AIHolder>();
-        eh = who.GetComponent<EquipHolder>();
-        mh = who.GetComponent<MoveHandler>();
+        aiHolder = who.GetComponent<AIHolder>();
+        actHandler = who.GetComponent<ActHandler>();
+        moveHandler = who.GetComponent<MoveHandler>();
     }
 
     public bool Check()
     {
-        if (eh.IsEquipSomethig())
+        if (actHandler.IsEquipSomething())
         {   //이미 무기를 착용 중
-            ah.SetAI(AIHolder.AIList.WalkAround);
+            aiHolder.SetAI(AIHolder.AIList.Patrol);
             return false;
         }
 
@@ -37,12 +37,12 @@ public class ChaseEquipAI : iAI
         List<GameObject> gos = bca.GetObjListInSight(who, 8f, Utility.EquipmentLayer | Utility.PlayerLayer);
         if (gos.Count == 0)
         {
-            ah.SetAI(AIHolder.AIList.WalkAround);
+            aiHolder.SetAI(AIHolder.AIList.Patrol);
             return false;
         }
         else if (gos[0].layer == Utility.PlayerLayer)
         {
-            ah.SetAI(AIHolder.AIList.ChasePlayer);
+            aiHolder.SetAI(AIHolder.AIList.ChasePlayer);
             return false;
         }
         else if (gos[0] != target)
@@ -52,9 +52,9 @@ public class ChaseEquipAI : iAI
 
         //타겟 Euipqment 에 접근?
         if ((who.transform.position - target.transform.position).magnitude <= 0.5f)
-        {   
-            eh.EKeyDown();
-            ah.SetAI(AIHolder.AIList.WalkAround);
+        {
+            actHandler.InputEquip();
+            aiHolder.SetAI(AIHolder.AIList.Patrol);
             return false;
         }
 
@@ -72,7 +72,7 @@ public class ChaseEquipAI : iAI
 
         if (path.Count == 0)
         {
-            ah.SetAI(AIHolder.AIList.WalkAround);
+            aiHolder.SetAI(AIHolder.AIList.Patrol);
             return false;
         }
 
@@ -81,6 +81,6 @@ public class ChaseEquipAI : iAI
 
     public void Do()
     {
-       mh.MoveToWorldPosition(path[0]);
+       moveHandler.MoveToWorldPosition(path[0]);
     }
 }

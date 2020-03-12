@@ -11,7 +11,7 @@ public class PistolAttack : AttackBase {
     private void Awake()
     {
         e = GetComponent<Equipment>();
-        range = 8f;
+        range = 5f;
         cooltime = 0.5f;
     }
     
@@ -23,22 +23,19 @@ public class PistolAttack : AttackBase {
         RaycastHit2D hit = Physics2D.Raycast(firePos.position, dir, 2f, targetLayer);
         Debug.DrawLine(firePos.position, ((Vector2)firePos.position + (dir * 2f)), Color.blue, 1f);
         Vector3 targetPos;
-        bool isBlock;
 
         if (hit)
         {
             if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Wall"))
                 hit.collider.gameObject.SendMessage("GetDamaged", 1);
             targetPos = hit.point;
-            isBlock = true;
         }
         else
         {
-            isBlock = false;
             targetPos = dir * 3f + (Vector2)firePos.position;
         }
         StopAllCoroutines();
-        e.ThrowHelper(targetPos, dir, isBlock);
+        e.ThrowHelper(targetPos, dir);
     }
     
     protected override void Execute()

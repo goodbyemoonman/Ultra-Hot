@@ -8,12 +8,15 @@ public class InputHandler : MonoBehaviour
     public GameObject player;
     SightManager sm;
     MoveHandler mh;
+    ActHandler ah;
     public bool canInput = true;
     Vector3 preMousePos;
+    bool isAct;
 
     private void Awake()
     {
         mh = player.GetComponent<MoveHandler>();
+        ah = player.GetComponent<ActHandler>();
         sm = GetComponent<SightManager>();
     }
 
@@ -23,17 +26,25 @@ public class InputHandler : MonoBehaviour
         Vector3 mousePos = Input.mousePosition;
         ToTimeScale(mousePos, dir);
         ToPlayer(mousePos, dir);
-
+        isAct = false;
         if (Input.GetMouseButtonDown(0))
-            player.SendMessage("LeftClick");
+        {
+            isAct = true;
+            ah.InputDefaultAtk();
+        }
 
         if (Input.GetMouseButtonDown(1))
-            player.SendMessage("RightClick");
-
+        {
+            isAct = true;
+            ah.InputThrowAtk();
+        }
         if (Input.GetKeyDown(KeyCode.E))
         {
-            player.SendMessage("EKeyDown");
+            isAct = true;
+            ah.InputEquip();
         }
+        if (isAct)
+            tsm.ActTimeScale();
     }
 
     void ToTimeScale(Vector3 inputMousePos, Vector2 inputDir)

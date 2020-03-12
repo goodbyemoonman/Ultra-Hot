@@ -43,7 +43,7 @@ public class HealthManager : MonoBehaviour {
         State = CharacterState.Sturn;
         Debug.Log(gameObject.name + " get Damaged " + damage + " points");
         hp -= damage;
-        SendMessage("Drop");
+        StopAllCoroutines();
         StartCoroutine(Timer(1f));
         GameObject effect = ObjPoolManager.Instance.GetObject(ObjectPoolList.BloodEffect);
         effect.transform.position = transform.position;

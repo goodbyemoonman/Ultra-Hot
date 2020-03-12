@@ -5,7 +5,7 @@ using UnityEngine;
 public enum INPUTTYPE { NONE, MOUSE, KEYBOARD }
 
 public class TimeScaleManager : MonoBehaviour {
-    readonly float scaler = 0.03f;
+    readonly float scaler = 0.01f;
     bool canScale = true;
     float target;
 
@@ -30,6 +30,11 @@ public class TimeScaleManager : MonoBehaviour {
             }
             yield return new WaitForSecondsRealtime(0.025f);
         }
+    }
+
+    public void ActTimeScale()
+    {
+        Time.timeScale = Mathf.Clamp01(Time.timeScale + 0.3f);
     }
 
     public void SetInputType(INPUTTYPE input)

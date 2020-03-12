@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class AtkHandler : MonoBehaviour {
+public class ActHandler : MonoBehaviour {
     EquipHolder holder;
     bool sw = true;
 
@@ -29,7 +29,7 @@ public class AtkHandler : MonoBehaviour {
         }
     }
 
-    public void LeftClick()
+    public void InputDefaultAtk()
     {
         if (sw == false)
             return;
@@ -37,11 +37,37 @@ public class AtkHandler : MonoBehaviour {
         holder.TryAttack();
     }
 
-    public void RightClick()
+    public void InputThrowAtk()
     {
         if (sw == false)
             return;
 
         holder.Throw();
+    }
+
+    public void InputEnemyDefaultAtk()
+    {
+        if (sw == false)
+            return;
+
+        holder.EnemyAtk();
+    }
+
+    public void InputEquip()
+    {
+        if (sw == false)
+            return;
+
+        holder.TryEquip();
+    }
+
+    public float GetAtkRange()
+    {
+        return holder.GetAtkRange();
+    }
+
+    public bool IsEquipSomething()
+    {
+        return holder.IsEquipSomethig();
     }
 }
