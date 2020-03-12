@@ -13,22 +13,20 @@ public class MapEditor : EditorWindow
     Rect preMouseRect;
 
     readonly float boxSize = 25;
-    readonly Vector2 scrollStartPos = new Vector2(30, 60);
+    readonly Vector2 scrollStartPos = new Vector2(30, 120);
     readonly Vector2 scrollArea = new Vector2(400, 250);
-    readonly Vector2 gridStartPos = new Vector2(55, 60);
-    readonly Rect gridRect = new Rect(30 + 25, 60 + 25, 400 - 65, 250 - 65);
-    readonly Vector2 underScrollArea = new Vector2(0, 340);
+    readonly Vector2 gridStartPos = new Vector2(55, 120);
+    readonly Rect gridRect = new Rect(30 + 25, 120 + 25, 400 - 65, 250 - 65);
+    readonly Vector2 underScrollArea = new Vector2(0, 400);
     readonly Color[] colors = {
         Color.white,
-        new Color(0.5f, 0.5f, 1f, 1),
-        new Color(1f, 0.5f, 0.5f, 1),
-        new Color(0.5f, 0.5f, 1, 1) };
-    enum WallType
-    {
-        NONE = 0,
-        WALL = 1
-    }
-    enum BrushType { WALL = 1, PLAYERSPAWN = 3, ENEMYSPAWN = 2}
+        new Color(0.5f, 0.5f, 1f, 1),//blue
+        new Color(1f, 0.5f, 0.5f, 1),//red
+        new Color(0.5f, 1, 0.5f, 1),//green
+        new Color(0.5f, 0.5f, 0f, 1)//yellow
+    };
+        
+    enum BrushType { NONE = 0, WALL = 1, PLAYERSPAWN = 3, ENEMYSPAWN = 2, GUN = 4}
 
     [MenuItem("Window/Map Editor Window")]
     static void Init()
@@ -61,17 +59,41 @@ public class MapEditor : EditorWindow
             ClickEvent(GetCoordWithPosition(Event.current.mousePosition));
         }
 
-        GUILayout.BeginHorizontal(GUILayout.Width(400));
+        EditorGUILayout.BeginHorizontal(GUILayout.Width(400));
         {
             brushNow = (BrushType)GUILayout.Toolbar((int)brushNow - 1,
                 new string[] {
                     BrushType.WALL.ToString(),
                     BrushType.ENEMYSPAWN.ToString(),
-                    BrushType.PLAYERSPAWN.ToString()
+                    BrushType.PLAYERSPAWN.ToString(),
+                    BrushType.GUN.ToString()
                 }) + 1;
         }
-        GUILayout.EndHorizontal();
-        GUILayout.BeginHorizontal(GUILayout.Width(400));
+        EditorGUILayout.EndHorizontal();
+        EditorGUILayout.BeginHorizontal();
+        {
+            data.SetNumberOfEnemy(EditorGUILayout.IntField("Number of Enemy", data.source.numberOfEnemy, GUILayout.Width(300)));
+        }
+        EditorGUILayout.EndHorizontal();
+        EditorGUILayout.BeginHorizontal();
+        {
+            Color originC = GUI.backgroundColor;
+            GUI.backgroundColor = colors[(int)BrushType.WALL];
+            GUILayout.Box("",GUILayout.Width(30));
+            GUILayout.Label("Wall", GUILayout.Width(50));
+            GUI.backgroundColor = colors[(int)BrushType.ENEMYSPAWN];
+            GUILayout.Box("", GUILayout.Width(30));
+            GUILayout.Label("Enemy", GUILayout.Width(50));
+            GUI.backgroundColor = colors[(int)BrushType.PLAYERSPAWN];
+            GUILayout.Box("", GUILayout.Width(30));
+            GUILayout.Label("Player", GUILayout.Width(50));
+            GUI.backgroundColor = colors[(int)BrushType.GUN];
+            GUILayout.Box("", GUILayout.Width(30));
+            GUILayout.Label("Gun", GUILayout.Width(50));
+            GUI.backgroundColor = originC;
+        }
+        EditorGUILayout.EndHorizontal();
+        EditorGUILayout.BeginHorizontal(GUILayout.Width(400));
         {
             if (GUI.Button(new Rect(underScrollArea, new Vector2(150, EditorGUIUtility.singleLineHeight)), "Load Map"))
             {
@@ -98,7 +120,7 @@ public class MapEditor : EditorWindow
                 }
             }
         }
-        GUILayout.EndHorizontal();
+        EditorGUILayout.EndHorizontal();
     }
 
 
@@ -147,13 +169,27 @@ public class MapEditor : EditorWindow
             {
                 Vector2Int coord = new Vector2Int(x, y);
                 string s = x + "," + y;
+                BrushType c = BrushType.NONE;
                 if (data.source.playerSpawn == coord)
+                {
                     s = "P";
+                    c = BrushType.PLAYERSPAWN;
+                }
                 if (data.source.enemySpawns.Contains(coord))
+                {
                     s = "E";
-                WallType c = WallType.NONE;
+                    c = BrushType.ENEMYSPAWN;
+                }
+                if (data.source.gunSpawn.Contains(coord))
+                {
+                    s = "G";
+                    c = BrushType.GUN;
+                }
                 if (data.source.walls.Contains(coord))
-                    c = WallType.WALL;
+                {
+                    s = "W";
+                    c = BrushType.WALL;
+                }
                 DrawColorBox(rects[x, y], s, c);
 
             }
@@ -172,22 +208,11 @@ public class MapEditor : EditorWindow
         result.y = data.source.mapSize.y - Mathf.FloorToInt(result.y / boxSize);
         return new Vector2Int((int)result.x, (int)result.y);
     }
-
-    void DrawColorBox(Rect r,GUIContent content ,WallType n2c)
-    {
-        DrawColorBox(r, content, colors[(int)n2c]);
-    }
-
-    void DrawColorBox(Rect r, string s, WallType n2c)
+    
+    void DrawColorBox(Rect r, string s, BrushType boxType)
     {
         GUIContent content = new GUIContent(s);
-        DrawColorBox(r, content, colors[(int)n2c]);
-    }
-
-    void DrawColorBox(Rect r, string s, Color c)
-    {
-        GUIContent content = new GUIContent(s);
-        DrawColorBox(r, content, c);
+        DrawColorBox(r, content, colors[(int)boxType]);
     }
 
     void DrawColorBox(Rect r, GUIContent content, Color c)
@@ -215,6 +240,11 @@ public class MapEditor : EditorWindow
         data.SetPlayerSpawn(pos);            
     }
 
+    void SetPistolSpawn(Vector2Int pos)
+    {
+        data.SetGunSpawn(pos);
+    }
+
     void ClickEvent(Vector2Int pos)
     {
         switch (brushNow)
@@ -228,6 +258,9 @@ public class MapEditor : EditorWindow
             case BrushType.PLAYERSPAWN:
                 SetPlayerSpawn(pos);
                 break;
+            case BrushType.GUN:
+                SetPistolSpawn(pos);
+                break;                
         }
         
         this.Repaint();

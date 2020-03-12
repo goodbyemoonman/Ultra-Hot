@@ -8,6 +8,11 @@ using System.IO;
 public class MapDataManager {
     public MapDataSource source;
 
+    public MapDataManager()
+    {
+        source = new MapDataSource();
+    }
+
     private void OnEnable()
     {
         source = new MapDataSource();
@@ -75,6 +80,7 @@ public class MapDataManager {
     {
         if (CanSet(coord) == false ||
             CheckCollision(coord, source.playerSpawn) ||
+            CheckCollision(coord, source.gunSpawn) ||
             CheckCollision(coord, source.enemySpawns))
             return;
 
@@ -93,7 +99,8 @@ public class MapDataManager {
     public void SetPlayerSpawn(Vector2Int coord)
     {
         if (CanSet(coord) == false || 
-            CheckCollision(coord, source.walls) || 
+            CheckCollision(coord, source.walls) ||
+            CheckCollision(coord, source.gunSpawn) ||
             CheckCollision(coord, source.enemySpawns))
             return;
 
@@ -105,6 +112,7 @@ public class MapDataManager {
     {
         if (CanSet(coord) == false ||
             CheckCollision(coord, source.playerSpawn) ||
+            CheckCollision(coord, source.gunSpawn) ||
             CheckCollision(coord, source.walls))
             return;
 
@@ -120,12 +128,38 @@ public class MapDataManager {
         }
     }
 
+    public void SetGunSpawn(Vector2Int coord)
+    {
+        if (CanSet(coord) == false ||
+            CheckCollision(coord, source.playerSpawn) ||
+            CheckCollision(coord, source.walls) ||
+            CheckCollision(coord, source.enemySpawns))
+            return;
+
+        if (source.gunSpawn.Contains(coord))
+        {
+            source.gunSpawn.Remove(coord);
+            Debug.Log("Unset Pistol Spawn at " + coord);
+        }
+        else
+        {
+            source.gunSpawn.Add(coord);
+            Debug.Log("Set Pistol Spawn at " + coord);
+        }
+    }
+
     public void SetMapSize(Vector2Int size)
     {
         if (size.x < 0 || size.y < 0)
             return;
         Debug.Log("Set Map Size to " + size);
         source.mapSize = size;
+    }
+
+    public void SetNumberOfEnemy(int input)
+    {
+        source.numberOfEnemy = Mathf.Clamp(input, 0, 20);
+        Debug.Log("Number of Enemy Set : " + source.numberOfEnemy);
     }
 
     public void ClearMapData()
