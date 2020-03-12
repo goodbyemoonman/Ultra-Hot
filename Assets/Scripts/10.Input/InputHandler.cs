@@ -5,34 +5,49 @@ using UnityEngine;
 public class InputHandler : MonoBehaviour
 {
     public TimeScaleManager tsm;
-    MoveUnitCommand moveUnitCommand = new MoveUnitCommand(Vector2.zero);
-    RotateUnitCommand rotateUnitCommand = new RotateUnitCommand();
     public GameObject player;
+    SightManager sm;
+    MoveHandler mh;
+    ActHandler ah;
     public bool canInput = true;
     Vector3 preMousePos;
+    bool isAct;
+
+    private void Awake()
+    {
+        mh = player.GetComponent<MoveHandler>();
+        ah = player.GetComponent<ActHandler>();
+        sm = GetComponent<SightManager>();
+    }
 
     private void Update()
     {
-        Vector2 _direction = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        Vector3 _mousePos = Input.mousePosition;
-        TimeScaleInput(_mousePos, _direction);
-        PlayerMoveInput(_mousePos, _direction);
-
+        Vector2 dir = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+        Vector3 mousePos = Input.mousePosition;
+        ToTimeScale(mousePos, dir);
+        ToPlayer(mousePos, dir);
+        isAct = false;
         if (Input.GetMouseButtonDown(0))
-            player.SendMessage("LeftClick");
+        {
+            isAct = true;
+            ah.InputDefaultAtk();
+        }
 
         if (Input.GetMouseButtonDown(1))
-            player.SendMessage("RightClick");
-
+        {
+            isAct = true;
+            ah.InputThrowAtk();
+        }
         if (Input.GetKeyDown(KeyCode.E))
         {
-            player.SendMessage("EKeyDown");
+            isAct = true;
+            ah.InputEquip();
         }
-        
-        moveUnitCommand.Execute(player);
+        if (isAct)
+            tsm.ActTimeScale();
     }
 
-    void TimeScaleInput(Vector3 inputMousePos, Vector2 inputDir)
+    void ToTimeScale(Vector3 inputMousePos, Vector2 inputDir)
     {
         if (inputDir != Vector2.zero)
             tsm.SetInputType(INPUTTYPE.KEYBOARD);
@@ -44,23 +59,23 @@ public class InputHandler : MonoBehaviour
         preMousePos = Input.mousePosition;
     }
 
-    void PlayerMoveInput(Vector3 inputMousePos, Vector2 inputDir)
+    void ToPlayer(Vector3 inputMousePos, Vector2 inputDir)
     {
         if (canInput == false)
             return;
 
-        moveUnitCommand.SetDirection(inputDir);
+        mh.MoveToWorldDirection(inputDir.normalized);
+        float angle = Vector2.SignedAngle(
+                Vector2.right,
+                Camera.main.ScreenToWorldPoint(inputMousePos) - player.transform.position);
 
-        CommandToRotate(
-            GetAngle(player.transform.position, 
-            Camera.main.ScreenToWorldPoint(inputMousePos)));
+        CommandToRotate(angle);
     }
 
     void CommandToRotate(float angle)
     {
-        rotateUnitCommand.Initialize(angle);
-        rotateUnitCommand.Execute(player);
-        SendMessage("RefreshSight");
+        mh.LookAt(angle);
+        sm.RefreshSight();
     }
 
     float GetAngle(Vector2 objPos, Vector2 cursor)

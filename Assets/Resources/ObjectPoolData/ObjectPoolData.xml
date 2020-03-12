@@ -13,5 +13,23 @@
       <count>10</count>
       <prefabPath>Prefab\BloodEffect</prefabPath>
     </ObjPoolSource>
+    <ObjPoolSource>
+      <name />
+      <hideFlags>None</hideFlags>
+      <count>5</count>
+      <prefabPath>Prefab\Dummy</prefabPath>
+    </ObjPoolSource>
+    <ObjPoolSource>
+      <name />
+      <hideFlags>None</hideFlags>
+      <count>5</count>
+      <prefabPath>Prefab\Pistol</prefabPath>
+    </ObjPoolSource>
+    <ObjPoolSource>
+      <name />
+      <hideFlags>None</hideFlags>
+      <count>2</count>
+      <prefabPath>Prefab\PistolDistroyEffect</prefabPath>
+    </ObjPoolSource>
   </sources>
 </ObjPool>

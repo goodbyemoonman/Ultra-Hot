@@ -33,7 +33,7 @@ public class MapEditor : EditorWindow
     [MenuItem("Window/Map Editor Window")]
     static void Init()
     {
-        data = CreateInstance<MapDataManager>();
+        data = new MapDataManager();
         MapEditor window = GetWindow<MapEditor>("Map Editor");
         window.Show();
     }

@@ -5,12 +5,15 @@ using UnityEngine;
 public class MoveHandler : MonoBehaviour {
     Rigidbody2D rgbd;
     bool sw = true;
-    readonly float speed = 4f;
+    float speed = 2f;  //1초에 2Unit 이동합니다.
+    Vector2 prePos;
 
     private void Awake()
     {
         rgbd = GetComponent<Rigidbody2D>();
         GetComponent<HealthManager>().StateTeller += StateObserver;
+        if (gameObject.CompareTag("Enemy"))
+            speed = 1.5f;
     }
 
     private void OnEnable()
@@ -30,9 +33,8 @@ public class MoveHandler : MonoBehaviour {
             sw = true;
         }
     }
-
-
-    public void MoveToWorldDir(Vector2 dir)
+    
+    public void MoveToWorldDirection(Vector2 dir)
     {
         if (sw == false)
             return;
@@ -41,19 +43,27 @@ public class MoveHandler : MonoBehaviour {
 
         rgbd.velocity = dir;
     }
-
-    public void MoveToSelfDir(Vector2 dir)
+    
+    public void MoveToWorldPosition(Vector2 targetPos)
     {
         if (sw == false)
             return;
+        if (rgbd == null)
+            Awake();
 
-        dir *= speed;
+        Vector2 dir = (targetPos - (Vector2)transform.position).normalized;
+        float angle = Vector2.SignedAngle(Vector2.right, dir);
+        transform.eulerAngles = new Vector3(0, 0, angle);
+        rgbd.velocity = dir * speed;
+    }
+    
+    public void LookAt(float angle)
+    {
+        gameObject.transform.eulerAngles = new Vector3(0, 0, angle);
+    }
 
-        float angle = Mathf.Deg2Rad * transform.eulerAngles.z;
-
-        Vector2 newDir = new Vector2(
-            (Mathf.Cos(angle) * dir.x) + (-Mathf.Sin(angle) * dir.y), 
-            (Mathf.Sin(angle) * dir.x) + (Mathf.Cos(angle) * dir.y));
-        rgbd.velocity = newDir;
+    public void StopMove()
+    {
+        rgbd.velocity = Vector2.zero;
     }
 }
