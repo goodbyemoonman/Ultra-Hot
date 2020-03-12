@@ -10,7 +10,7 @@ public class MapDataSource {
     public List<Vector2Int> enemySpawns;
     public Vector2Int playerSpawn;
 
-    private void OnEnable()
+    public MapDataSource()
     {
         walls = new List<Vector2Int>();
         enemySpawns = new List<Vector2Int>();

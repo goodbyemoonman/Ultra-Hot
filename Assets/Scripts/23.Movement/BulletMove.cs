@@ -6,7 +6,7 @@ public class BulletMove : MonoBehaviour {
     TrailRenderer tr;
     SpriteRenderer sr;
     readonly int dmg = 3;
-    readonly int speed = 6;
+    readonly int speed = 10;
     readonly float deadSpeed = 0.2f;
     bool isCrashed = false;
     float t = 0;

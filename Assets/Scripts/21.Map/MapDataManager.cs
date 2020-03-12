@@ -5,7 +5,7 @@ using System.Xml;
 using System.Xml.Serialization;
 using System.IO;
 
-public class MapDataManager : ScriptableObject {
+public class MapDataManager {
     public MapDataSource source;
 
     private void OnEnable()

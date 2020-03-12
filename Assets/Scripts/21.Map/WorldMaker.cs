@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
-using UnityEngine.UI;
 
-public class WorldMaker : MonoBehaviour {
+public class WorldMaker : Singleton<WorldMaker> {
     MapDataManager mdm;
     public Tilemap obstacleGrid;
     public Tile obstacle;
@@ -12,9 +11,8 @@ public class WorldMaker : MonoBehaviour {
 
     private void Awake()
     {
-        mdm = ScriptableObject.CreateInstance<MapDataManager>();
+        mdm = new MapDataManager();
         dataFilePath = Application.dataPath + "/Resources/MapData/";
-        //txxt.text = dataFilePath;
         SetTileMap();
     }
 
@@ -30,5 +28,14 @@ public class WorldMaker : MonoBehaviour {
                 0);
             obstacleGrid.SetTile(pos, obstacle);
         }
+    }
+
+    public bool IsWall(Vector2Int pos)
+    {
+        Vector3Int input = new Vector3Int(pos.x, pos.y, 0);
+        if (obstacleGrid.GetTile(input) == obstacle)
+            return true;
+        else
+            return false;
     }
 }

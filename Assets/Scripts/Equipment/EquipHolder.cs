@@ -4,97 +4,120 @@ using UnityEngine;
 
 public class EquipHolder : MonoBehaviour {
     float boundary;
-    RaycastHit2D[] hits;
-    int targetLayer;
-    GameObject equipment;
-    public Transform equipPos;
+    BoundaryCheckAlgorithm bca;
+    AttackBase punch;
     FixedJoint2D fxjt2d;
+    [SerializeField]
+    GameObject EquipObj;
+    AttackBase atkNow;
+    Equipment equipNow;
+    public Transform equipPos;
+    public BulletReminder br;
+    bool canAct;
 
     private void Awake()
     {
+        punch = GetComponent<PunchAttack>();
+        bca = new BoundaryCheckAlgorithm();
         fxjt2d = GetComponent<FixedJoint2D>();
-        targetLayer = 1 << LayerMask.NameToLayer("EquipItem");
         boundary = 1.5f;
+        atkNow = punch;
+        canAct = true;
+    }
+
+    public void StateObserver(HealthManager.CharacterState state)
+    {
+        if (state == HealthManager.CharacterState.Sturn)
+        {   //맞으면 무기를 떨어트려
+            Drop();
+            canAct = false;
+        }
+        else
+            canAct = true;
+
     }
 
     public bool IsEquipSomethig()
     {
-        if (equipment == null)
+        if (EquipObj == null)
             return false;
         else
             return true;
     }
-
-    bool CheckItem(float boundary)
+    
+    public void TryEquip()
     {
-        hits = Physics2D.CircleCastAll(
-            transform.position, 
-            boundary, Vector2.zero, 0f, targetLayer);
-        if (hits.Length != 0)
-            return true;
-        else
-            return false;
-    }
-
-    public void EKeyDown()
-    {
-        if (CheckItem(boundary) == false)
+        if (IsEquipSomethig())
+            return;
+        List<GameObject> candidates = bca.GetObjListInSight(gameObject, boundary, Utility.EquipmentLayer);
+        if (candidates.Count == 0)
             return;
 
-        GameObject equipCandidate = GetShortestDistanceGO(boundary);
-
-        if (equipCandidate == null)
-            return;
-        fxjt2d.enabled = true;
-        fxjt2d.connectedBody = equipCandidate.GetComponent<Rigidbody2D>();
-        equipCandidate.SendMessage("EquipTo", equipPos);
-        equipment = equipCandidate;
+        Equip(candidates[0]);
     }
-
-    GameObject GetShortestDistanceGO(float boundary)
-    {
-        GameObject result = null;
-        float shortest = boundary + 1;
-        for (int i = 0; i < hits.Length; i++)
-        {
-            float distance = GetDistance(hits[i].collider.transform);
-            if (shortest > distance)
-            {
-                shortest = distance;
-                result = hits[i].collider.gameObject;
-            }
-        }
-
-        return result;
-    }
-
+    
     public void TryAttack()
     {
-        equipment.SendMessage("TryExecute");
+        atkNow.TryExecute();
+    }
+
+    void Equip(GameObject equipObj)
+    {
+        if (!canAct)
+            return;
+
+        this.EquipObj = equipObj;
+        fxjt2d.enabled = true;
+        fxjt2d.connectedBody = equipObj.GetComponent<Rigidbody2D>();
+        equipNow = equipObj.GetComponent<Equipment>();
+        equipNow.EquipTo(equipPos);
+        atkNow = equipObj.GetComponent<AttackBase>();
+        if(br != null)
+        {
+            equipNow.BulletReminder += br.Remind;
+        }
+    }
+
+    void UnEquip(string msg)
+    {
+        fxjt2d.connectedBody = null;
+        fxjt2d.enabled = false;
+        if (br != null)
+            equipNow.BulletReminder -= br.Remind;
+        EquipObj.SendMessage(msg);
+        atkNow = punch;
+        equipNow = null;
+        EquipObj = null;
     }
 
     public void Throw()
     {
-        if (equipment == null)
+        if (EquipObj == null)
             return;
-        fxjt2d.connectedBody = null;
-        fxjt2d.enabled = false;
-        equipment.SendMessage("ThrowThisObj");
-        equipment = null;
+        UnEquip("ThrowThisObj");
+    }
+    
+    void Drop()
+    {
+        if (EquipObj == null)
+            return;
+        UnEquip("Drop");
+    }
+    
+    public float GetAtkRange()
+    {
+        return atkNow.AtkRange;
     }
 
-    public void Drop()
+    public void EnemyAtk()
     {
-        if (equipment == null)
-            return;
-        fxjt2d.connectedBody = null;
-        fxjt2d.enabled = false;
-        equipment.SendMessage("Drop");
-        equipment = null;
-    }
-
-    float GetDistance(Transform tf)
-    {
-        return (tf.position - transform.position).magnitude;
+        if (atkNow.EnoughBullet())
+            TryAttack();
+        else
+        {
+            if (EquipObj == null)
+                return;
+            UnEquip("DestroyThis");
+        }
     }
 }

@@ -4,36 +4,56 @@ using UnityEngine;
 
 public class Equipment : MonoBehaviour {
     Rigidbody2D rgbd;
+    public delegate void Remind(int n);
+    public event Remind BulletReminder;
+    AttackBase ab;
+    GameObject eKeyUi;
 
     private void Awake()
     {
         rgbd = GetComponent<Rigidbody2D>();
+        ab = GetComponent<AttackBase>();
+        StopAllCoroutines();
+        eKeyUi = transform.GetChild(1).gameObject;
+        eKeyUi.SetActive(true);
     }
 
     public void EquipTo(Transform parent)
     {
+        eKeyUi.SetActive(false);
         transform.SetParent(parent);
         StopAllCoroutines();
         StartCoroutine(EquipMovement());
-        TargetLayerSet(parent.gameObject.layer);
+        ab.Init();
+        TargetLayerSet(parent.CompareTag("Player"));
+        ab.PlayerSet(parent.CompareTag("Player"));
     }
 
-    void TargetLayerSet(int parentLayer)
+    void TargetLayerSet(bool isPlayer)
     {
         int targetLayer;
 
-        if (parentLayer == LayerMask.NameToLayer("PlayerCharacter"))
-            targetLayer = 1 << LayerMask.NameToLayer("EnemyCharacter");
+        if (isPlayer)
+            targetLayer = Utility.EnemyLayer;
         else
-            targetLayer = 1 << LayerMask.NameToLayer("PlayerCharacter");
+            targetLayer = Utility.PlayerLayer;
 
-        targetLayer |= 1 << LayerMask.NameToLayer("Wall");
-        SendMessage("SetTargetLayer", targetLayer);
+        targetLayer |= Utility.WallLayer;
+        ab.SetTargetLayer(targetLayer);
+    }
+
+    public void DestroyThis()
+    {
+        transform.SetParent(null);
+        GameObject effect = ObjPoolManager.Instance.GetObject(ObjectPoolList.PistolDistroyEffect);
+        effect.transform.position = transform.position;
+        effect.SetActive(true);
+
+        ObjPoolManager.Instance.ReturnObject(gameObject);
     }
 
     public void Drop()
     {
-        transform.SetParent(null);
         StartCoroutine(DropMovement());
     }
 
@@ -55,17 +75,17 @@ public class Equipment : MonoBehaviour {
     {
         rgbd.AddForce(new Vector2(Random.Range(-3f, 3f), Random.Range(-3f, 3f)) * 5f);
         yield return null;
+        eKeyUi.SetActive(true);
     }
 
-    public void ThrowHelper(Vector3 targetPos, Vector2 dir, bool isBlocked)
+    public void ThrowHelper(Vector3 targetPos, Vector2 dir)
     {
         StopAllCoroutines();
-        StartCoroutine(ThrowMovement(targetPos, dir, isBlocked));
+        StartCoroutine(ThrowMovement(targetPos, dir));
     }
 
-    IEnumerator ThrowMovement(Vector3 targetPos, Vector2 dir, bool isBlocked)
+    IEnumerator ThrowMovement(Vector3 targetPos, Vector2 dir)
     {
-        gameObject.layer = LayerMask.NameToLayer("EquipItem");
         Vector3 originPos = transform.position;
         for (float t = 0; t < 1; t += 0.2f)
         {
@@ -74,9 +94,13 @@ public class Equipment : MonoBehaviour {
         }
         transform.SetParent(null);
         rgbd.WakeUp();
-        if (isBlocked)
-            Drop();
-        else
-            rgbd.AddForce(dir.normalized * 100f);
+
+        DestroyThis();
+    }
+
+    public void BulletRemind(int n)
+    {
+        if (BulletReminder != null)
+            BulletReminder(n);
     }
 }

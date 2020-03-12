@@ -47,7 +47,6 @@ public class SightManager : MonoBehaviour
         }
     }
 
-
     Vector3[] GetFogTargetPos(Vector3 baseLinePos)
     {
         int count = maxCount;
@@ -73,7 +72,6 @@ public class SightManager : MonoBehaviour
 
         return result;
     }
-
 }
 
 class SightData

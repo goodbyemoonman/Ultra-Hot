@@ -11,7 +11,8 @@ public class PistolAttack : AttackBase {
     private void Awake()
     {
         e = GetComponent<Equipment>();
-        cooltime = 1f;
+        range = 5f;
+        cooltime = 0.5f;
     }
     
     public override void ThrowThisObj()
@@ -22,37 +23,67 @@ public class PistolAttack : AttackBase {
         RaycastHit2D hit = Physics2D.Raycast(firePos.position, dir, 2f, targetLayer);
         Debug.DrawLine(firePos.position, ((Vector2)firePos.position + (dir * 2f)), Color.blue, 1f);
         Vector3 targetPos;
-        bool isBlock;
 
         if (hit)
         {
             if (hit.collider.gameObject.layer != LayerMask.NameToLayer("Wall"))
                 hit.collider.gameObject.SendMessage("GetDamaged", 1);
             targetPos = hit.point;
-            isBlock = true;
         }
         else
         {
-            isBlock = false;
             targetPos = dir * 3f + (Vector2)firePos.position;
         }
         StopAllCoroutines();
-        e.ThrowHelper(targetPos, dir, isBlock);
+        e.ThrowHelper(targetPos, dir);
     }
     
     protected override void Execute()
     {
-        if (bulletCount < 1)
+        if (!HasBullet())
             return;
 
-        bulletCount--;
+        ShootBullet(Vector3.zero);
+    }
 
+    protected override void ExecuteEnemy()
+    {
+        if (!HasBullet())
+        {
+            gameObject.SendMessage("RunOutBullet");
+            return;
+        }
+        ShootBullet(new Vector3(0, 0, Random.Range(-15f, 15f)));
+    }
+
+    bool HasBullet()
+    {
+        bool result;
+        if(bulletCount < 1)
+        {
+            result = false;
+        }
+        else
+        {
+            bulletCount--;
+            result = true;
+        }
+        e.BulletRemind(bulletCount);
+        return result;
+    }
+
+    void ShootBullet(Vector3 addRotation)
+    {
         GameObject bullet = ObjPoolManager.Instance.GetObject(ObjectPoolList.BulletPrefab);
         bullet.transform.SetPositionAndRotation(
-            firePos.position, 
-            Quaternion.Euler(transform.eulerAngles));
+            firePos.position,
+            Quaternion.Euler(transform.eulerAngles + addRotation));
         bullet.transform.SetParent(null);
         bullet.SetActive(true);
     }
 
+    public override bool EnoughBullet()
+    {
+        return (bulletCount > 0);
+    }
 }

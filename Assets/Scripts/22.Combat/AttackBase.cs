@@ -7,6 +7,13 @@ public abstract class AttackBase : MonoBehaviour {
     protected float range = 1;
     bool isCooldown = false;
     protected int targetLayer;
+    protected bool isUsedPlayer;
+
+    public void Init()
+    {
+        isCooldown = true;
+        StartCoroutine(Timer(0.25f));
+    }
 
     public virtual void TryExecute()
     {
@@ -18,11 +25,16 @@ public abstract class AttackBase : MonoBehaviour {
         StopAllCoroutines();
         StartCoroutine(Timer(cooltime));
 
-        Execute();
+        if (isUsedPlayer)
+            Execute();
+        else
+            ExecuteEnemy();
     }
 
     protected abstract void Execute();
 
+    protected abstract void ExecuteEnemy();
+    
     void RefreshCooldown()
     {
         isCooldown = false;
@@ -32,7 +44,10 @@ public abstract class AttackBase : MonoBehaviour {
 
     IEnumerator Timer(float duration)
     {
-        yield return new WaitForSecondsRealtime(duration);
+        if (isUsedPlayer)
+            yield return new WaitForSecondsRealtime(duration);
+        else
+            yield return new WaitForSeconds(duration * 1.5f);
         RefreshCooldown();
     }
     
@@ -40,4 +55,13 @@ public abstract class AttackBase : MonoBehaviour {
     {
         targetLayer = layer;
     }
+
+    public void PlayerSet(bool isIt)
+    {
+        isUsedPlayer = isIt;
+    }
+
+    public float AtkRange { get { return range; } }
+
+    public abstract bool EnoughBullet();
 }
