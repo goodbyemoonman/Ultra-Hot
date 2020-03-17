@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class ActHandler : MonoBehaviour {
     EquipHolder holder;
-    bool sw = true;
+    bool sw = false;
 
     private void Awake()
     {
         holder = GetComponent<EquipHolder>();
-        GetComponent<HealthManager>().StateTeller += StateObserver;
+        GetComponent<HealthManager>().CharaStateTeller += CharaStateObserver;
     }
 
     private void OnEnable()
@@ -17,7 +17,7 @@ public class ActHandler : MonoBehaviour {
         sw = true;
     }
 
-    void StateObserver(HealthManager.CharacterState state)
+    void CharaStateObserver(HealthManager.CharacterState state)
     {
         if (state == HealthManager.CharacterState.Sturn)
         {
@@ -26,6 +26,19 @@ public class ActHandler : MonoBehaviour {
         else
         {
             sw = true;
+        }
+    }
+
+    void GameStateObserver(GameStateList state)
+    {
+        switch (state)
+        {
+            case GameStateList.StageStart:
+                sw = true;
+                break;
+            default:
+                sw = false;
+                break;
         }
     }
 

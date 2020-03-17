@@ -8,7 +8,7 @@ public class SightManager : MonoBehaviour
     public GameObject boxSightPrefab;
     public Transform playerTf;
     List<SightData> sight;
-    readonly int maxCount = 50;
+    readonly int maxCount = 100;
     readonly float baseRotateAngleRad = 2.3f; //120도 정도?
     readonly Vector3 fogStartPos = new Vector3(5, 10, 0);
     Transform parent;

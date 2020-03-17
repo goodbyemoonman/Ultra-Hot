@@ -1,26 +1,26 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class AIHolder : MonoBehaviour {
     public enum AIList { Patrol, ChasePlayer, ChaseEquip }
 
     BoundaryCheckAlgorithm bca;
     SeekAlgorithm sa;
-    ChasePlayerAI cpAI;
-    ChaseEquipAI ceAI;
-    PatrolAI ptAI;
-
+    ChasePlayerAI chasePlayerAI;
+    ChaseEquipAI chaseEquipAI;
+    PatrolAI patrolAI;
     iAI aiNow;
+
+    ActHandler actHandler;
 
     private void Awake()
     {
+        actHandler = GetComponent<ActHandler>();
         bca = new BoundaryCheckAlgorithm();
         sa = new SeekAlgorithm();
-        cpAI = new ChasePlayerAI(bca, sa, gameObject);
-        ceAI = new ChaseEquipAI(bca, sa, gameObject);
-        ptAI = new PatrolAI(bca, sa, gameObject);
-        aiNow = ptAI;
+        chasePlayerAI = new ChasePlayerAI(bca, sa, gameObject);
+        chaseEquipAI = new ChaseEquipAI(bca, sa, gameObject);
+        patrolAI = new PatrolAI(bca, sa, gameObject);
+        aiNow = patrolAI;
     }
 
     public void SetAI(AIList ai)
@@ -29,20 +29,50 @@ public class AIHolder : MonoBehaviour {
         switch (ai)
         {
             case AIList.Patrol:
-                aiNow = ptAI;
+                aiNow = patrolAI;
                 break;
             case AIList.ChaseEquip:
-                aiNow = ceAI;
+                aiNow = chaseEquipAI;
                 break;
             case AIList.ChasePlayer:
-                aiNow = cpAI;
+                aiNow = chasePlayerAI;
                 break;
         }
     }
 
     private void Update()
     {
-        if (aiNow.Check())
-            aiNow.Do();
+        ChooseAI();
+        aiNow.Check();
+        aiNow.Do();
+    }
+
+    void ChooseAI()
+    {
+        int targetLayer;
+        if (actHandler.IsEquipSomething())
+            targetLayer = Utility.PlayerLayer;
+        else
+            targetLayer = Utility.PlayerLayer | Utility.EquipmentLayer;
+
+        if (bca.CheckObjListInSight(gameObject, 8f, targetLayer))
+        {
+            if (bca.GetObjList()[0].CompareTag("Player"))
+            {
+                //플레이어 추적으로 변환.
+                aiNow = chasePlayerAI;
+            }
+            else
+            {
+                //무기 추적으로 변환.
+                aiNow = chaseEquipAI;
+            }
+        }
+        else
+        {
+            //패트롤로 변환
+            aiNow = patrolAI;
+        }
+
     }
 }

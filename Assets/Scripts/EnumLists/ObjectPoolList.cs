@@ -7,8 +7,11 @@ public enum ObjectPoolList
     NONE = -1,
 	BulletPrefab = 0, 
 	BloodEffect = 1, 
-	Dummy = 2, 
+	Enemy = 2, 
 	Pistol = 3, 
 	PistolDistroyEffect = 4, 
+	EnemySpawner = 5, 
+	BlackScreen = 6, 
+	OpeningEffect = 7, 
 
 }

@@ -12,7 +12,7 @@ public abstract class AttackBase : MonoBehaviour {
     public void Init()
     {
         isCooldown = true;
-        StartCoroutine(Timer(0.25f));
+        StartCoroutine(Timer(0.5f));
     }
 
     public virtual void TryExecute()

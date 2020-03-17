@@ -11,7 +11,7 @@ public class MoveHandler : MonoBehaviour {
     private void Awake()
     {
         rgbd = GetComponent<Rigidbody2D>();
-        GetComponent<HealthManager>().StateTeller += StateObserver;
+        GetComponent<HealthManager>().CharaStateTeller += StateObserver;
         if (gameObject.CompareTag("Enemy"))
             speed = 1.5f;
     }

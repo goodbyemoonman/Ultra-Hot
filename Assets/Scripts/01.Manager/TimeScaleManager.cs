@@ -6,17 +6,18 @@ public enum INPUTTYPE { NONE, MOUSE, KEYBOARD }
 
 public class TimeScaleManager : MonoBehaviour {
     readonly float scaler = 0.01f;
+    readonly float floor = 0.05f;
     bool canScale = true;
     float target;
 
-    private void Start()
+    private void Awake()
     {
-        StartCoroutine(ControlTimeScale());
+        StageManager.Instance.GameStateTeller += GameStateObserver;
     }
 
     IEnumerator ControlTimeScale()
     {
-        target = 0.05f;
+        target = floor;
         int multiplier = 1;
         while (true)
         {
@@ -34,7 +35,7 @@ public class TimeScaleManager : MonoBehaviour {
 
     public void ActTimeScale()
     {
-        Time.timeScale = Mathf.Clamp01(Time.timeScale + 0.3f);
+        Time.timeScale = Mathf.Clamp01(Time.timeScale + 0.15f);
     }
 
     public void SetInputType(INPUTTYPE input)
@@ -42,7 +43,7 @@ public class TimeScaleManager : MonoBehaviour {
         switch (input)
         {
             case INPUTTYPE.NONE:
-                target = 0.05f;
+                target = floor;
                 break;
             case INPUTTYPE.MOUSE:
                 target = 0.25f;
@@ -53,33 +54,20 @@ public class TimeScaleManager : MonoBehaviour {
         }
     }
 
-    public void SetTimeScaleImmediately(float to)
+    void GameStateObserver(GameStateList state)
     {
-        Time.timeScale = Mathf.Clamp01(to);
-    }
-    
-    public void SetScaleSwitch(bool isTurnOn)
-    {
-        canScale = isTurnOn;
-    }
-
-    public void FixTimeScale(float scale, float duration)
-    {
-        Time.timeScale = scale;
-        canScale = false;
-
-        StopAllCoroutines();
-        StartCoroutine(TurnOnTimer(duration));
-    }
-
-    private void OnGUI()
-    {
-        GUI.Label(new Rect(0, 0, 100, 50), Time.timeScale.ToString());
-    }
-
-    IEnumerator TurnOnTimer(float duration)
-    {
-        yield return new WaitForSecondsRealtime(duration);
-        canScale = true;
+        switch (state)
+        {
+            case GameStateList.StageStart:
+                Time.timeScale = 0.5f;
+                canScale = true;
+                StartCoroutine(ControlTimeScale());
+                break;
+            default:
+                StopAllCoroutines();
+                Time.timeScale = 1f;
+                canScale = false;
+                break;
+        }
     }
 }

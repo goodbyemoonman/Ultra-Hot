@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PistolAttack : AttackBase {
     public Transform firePos;
-    public GameObject bulletPrefab;
     int bulletCount = 6;
     Equipment e;
 
@@ -14,7 +13,13 @@ public class PistolAttack : AttackBase {
         range = 5f;
         cooltime = 0.5f;
     }
-    
+
+    private void OnEnable()
+    {
+        bulletCount = 6;
+        Init();
+    }
+
     public override void ThrowThisObj()
     {
         float cos = Mathf.Cos(transform.eulerAngles.z * Mathf.Deg2Rad);
@@ -35,7 +40,7 @@ public class PistolAttack : AttackBase {
             targetPos = dir * 3f + (Vector2)firePos.position;
         }
         StopAllCoroutines();
-        e.ThrowHelper(targetPos, dir);
+        e.ThrowHelper(targetPos);
     }
     
     protected override void Execute()
@@ -74,6 +79,7 @@ public class PistolAttack : AttackBase {
 
     void ShootBullet(Vector3 addRotation)
     {
+        SoundManager.Instance.PlaySE(gameObject, AudioClipList.Shoot01, AudioClipList.Shoot02);
         GameObject bullet = ObjPoolManager.Instance.GetObject(ObjectPoolList.BulletPrefab);
         bullet.transform.SetPositionAndRotation(
             firePos.position,

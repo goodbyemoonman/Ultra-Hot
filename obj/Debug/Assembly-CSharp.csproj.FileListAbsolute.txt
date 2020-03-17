@@ -166,3 +166,5 @@ Z:\testGame\ProjectSH\obj\Debug\Assembly-CSharp.csproj.CoreCompileInputs.cache
 Z:\testGame\ProjectSH\obj\Debug\Assembly-CSharp.csproj.CopyComplete
 Z:\testGame\ProjectSH\obj\Debug\Assembly-CSharp.dll
 Z:\testGame\ProjectSH\obj\Debug\Assembly-CSharp.pdb
+Z:\testGame\ProjectSH\Temp\bin\Debug\Unity.2D.PixelPerfect.dll
+Z:\testGame\ProjectSH\Temp\bin\Debug\Unity.2D.PixelPerfect.Editor.dll

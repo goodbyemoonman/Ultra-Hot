@@ -9,41 +9,44 @@ public class InputHandler : MonoBehaviour
     SightManager sm;
     MoveHandler mh;
     ActHandler ah;
-    public bool canInput = true;
+    bool canInputKey = false;
     Vector3 preMousePos;
-    bool isAct;
+    bool isActed;
 
     private void Awake()
     {
         mh = player.GetComponent<MoveHandler>();
         ah = player.GetComponent<ActHandler>();
         sm = GetComponent<SightManager>();
+        StageManager.Instance.GameStateTeller += GameStateObserver;
     }
 
     private void Update()
     {
+        if (!canInputKey)
+            return;
         Vector2 dir = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         Vector3 mousePos = Input.mousePosition;
         ToTimeScale(mousePos, dir);
         ToPlayer(mousePos, dir);
-        isAct = false;
+        isActed = false;
         if (Input.GetMouseButtonDown(0))
         {
-            isAct = true;
+            isActed = true;
             ah.InputDefaultAtk();
         }
 
         if (Input.GetMouseButtonDown(1))
         {
-            isAct = true;
+            isActed = true;
             ah.InputThrowAtk();
         }
         if (Input.GetKeyDown(KeyCode.E))
         {
-            isAct = true;
+            isActed = true;
             ah.InputEquip();
         }
-        if (isAct)
+        if (isActed)
             tsm.ActTimeScale();
     }
 
@@ -61,9 +64,6 @@ public class InputHandler : MonoBehaviour
 
     void ToPlayer(Vector3 inputMousePos, Vector2 inputDir)
     {
-        if (canInput == false)
-            return;
-
         mh.MoveToWorldDirection(inputDir.normalized);
         float angle = Vector2.SignedAngle(
                 Vector2.right,
@@ -77,9 +77,25 @@ public class InputHandler : MonoBehaviour
         mh.LookAt(angle);
         sm.RefreshSight();
     }
-
-    float GetAngle(Vector2 objPos, Vector2 cursor)
+    
+    void GameStateObserver(GameStateList state)
     {
-        return Vector2.SignedAngle(Vector2.right, cursor - objPos);
+        switch (state)
+        {
+            case GameStateList.StageReady:
+                player.transform.position = Vector3.zero;
+                canInputKey = false;
+                break;
+            case GameStateList.StageStart:
+                canInputKey = true;
+                break;
+            case GameStateList.Win:
+                canInputKey = false;
+                mh.StopMove();
+                break;
+            default:
+                canInputKey = false;
+                break;
+        }
     }
 }

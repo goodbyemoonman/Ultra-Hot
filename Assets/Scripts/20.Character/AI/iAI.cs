@@ -3,6 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface iAI {
-    bool Check();
+    void Check();
     void Do();
 }

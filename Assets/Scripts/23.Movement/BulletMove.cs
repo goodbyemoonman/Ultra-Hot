@@ -6,7 +6,7 @@ public class BulletMove : MonoBehaviour {
     TrailRenderer tr;
     SpriteRenderer sr;
     readonly int dmg = 3;
-    readonly int speed = 10;
+    readonly int speed = 5;
     readonly float deadSpeed = 0.2f;
     bool isCrashed = false;
     float t = 0;
@@ -34,7 +34,13 @@ public class BulletMove : MonoBehaviour {
         isCrashed = true;
 
         if (collision.gameObject.layer != LayerMask.NameToLayer("Wall"))
+        {
             collision.SendMessage("GetDamaged", dmg);
+        }
+        else
+        {
+            SoundManager.Instance.PlaySE(collision.gameObject, AudioClipList.WallImpact1, AudioClipList.WallImpact2, AudioClipList.WallImpact3);
+        }
     }
 
     // Update is called once per frame

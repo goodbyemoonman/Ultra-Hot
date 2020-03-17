@@ -19,8 +19,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4078669467958698}
+  - component: {fileID: 114823375654837206}
   - component: {fileID: 198391597382019984}
   - component: {fileID: 114242367602975148}
+  - component: {fileID: 114907984831060984}
   - component: {fileID: 199520728173118438}
   m_Layer: 0
   m_Name: BloodEffect
@@ -51,6 +53,28 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7bd25a4bacb304046b9f519602bd35a0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114823375654837206
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1372449309231926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f134de53eb94414e8f3af8abc3c3753, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114907984831060984
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1372449309231926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bebc2074ed433704f99ee10580318832, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!198 &198391597382019984

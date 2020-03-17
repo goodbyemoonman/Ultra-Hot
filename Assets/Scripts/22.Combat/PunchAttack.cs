@@ -18,6 +18,13 @@ public class PunchAttack : AttackBase {
         range = 0.8f;
     }
 
+    private void OnEnable()
+    {
+        punchR.SetActive(false);
+        punchL.SetActive(false);
+        Init();
+    }
+
     protected override void Execute()
     {
         if (sw)

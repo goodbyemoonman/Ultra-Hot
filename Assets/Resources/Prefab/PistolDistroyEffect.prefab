@@ -19,8 +19,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4571495510951348}
+  - component: {fileID: 114830109455383420}
   - component: {fileID: 198265569718062044}
   - component: {fileID: 114933533032641948}
+  - component: {fileID: 114172925732843510}
   - component: {fileID: 199435516823607958}
   m_Layer: 0
   m_Name: PistolDistroyEffect
@@ -42,6 +44,28 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114172925732843510
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1707143624128956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc590eaa5c2180940a4fb24bf7bfca8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &114830109455383420
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1707143624128956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f134de53eb94414e8f3af8abc3c3753, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &114933533032641948
 MonoBehaviour:
   m_ObjectHideFlags: 1
