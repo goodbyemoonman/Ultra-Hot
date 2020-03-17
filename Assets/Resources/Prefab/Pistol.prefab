@@ -54,7 +54,7 @@ GameObject:
   - component: {fileID: 4446589656621530}
   - component: {fileID: 114721426352852740}
   - component: {fileID: 114489340836398048}
-  - component: {fileID: 61018424114718594}
+  - component: {fileID: 58381042172604656}
   - component: {fileID: 50477767743530714}
   m_Layer: 15
   m_Name: Pistol
@@ -144,7 +144,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 0.2
+  m_Mass: 1
   m_LinearDrag: 0.05
   m_AngularDrag: 0.05
   m_GravityScale: 0
@@ -153,8 +153,8 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
---- !u!61 &61018424114718594
-BoxCollider2D:
+--- !u!58 &58381042172604656
+CircleCollider2D:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
@@ -166,18 +166,8 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.5, y: 0.1}
-  m_EdgeRadius: 0
+  m_Radius: 0.4
 --- !u!114 &114489340836398048
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -190,8 +180,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   firePos: {fileID: 4006459288054248}
-  bulletPrefab: {fileID: 1639190304579062, guid: 5e69225a99e3e2444ba7ce4ab459b0b8,
-    type: 2}
 --- !u!114 &114721426352852740
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -246,9 +234,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 193951515
-  m_SortingLayer: 2
-  m_SortingOrder: 0
+  m_SortingLayerID: 172934719
+  m_SortingLayer: 5
+  m_SortingOrder: 2
   m_Sprite: {fileID: 21300000, guid: dd12ef9dd48e466459645c93ef0cfa01, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

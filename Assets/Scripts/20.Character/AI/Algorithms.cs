@@ -231,6 +231,13 @@ class Node
 
 public class BoundaryCheckAlgorithm
 {
+    List<GameObject> objList;
+
+    public BoundaryCheckAlgorithm()
+    {
+        objList = new List<GameObject>();
+    }
+
     Collider2D[] CheckBoundary(GameObject who, float radius, int layer)
     {
         return Physics2D.OverlapCircleAll(who.transform.position, radius, layer);
@@ -350,13 +357,19 @@ public class BoundaryCheckAlgorithm
         return result;
     }
 
-    public List<GameObject> GetObjListInSight(GameObject who, float radius, int layer)
+    public bool CheckObjListInSight(GameObject who, float radius, int layer)
     {
-        List<GameObject> result = ArrayToList(CheckBoundary(who, radius, layer), who);
+        objList.Clear();
+        objList = ArrayToList(CheckBoundary(who, radius, layer), who);
 
-        QuickSortByDistance(result, who.transform.position);
-        result = CutOffAlreadyEquiped(result);
+        QuickSortByDistance(objList, who.transform.position);
+        objList = CutOffAlreadyEquiped(objList);
+        
+        return objList.Count > 0;
+    }
 
-        return result;
+    public List<GameObject> GetObjList()
+    {
+        return objList;
     }
 }

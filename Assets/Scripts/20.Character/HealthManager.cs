@@ -15,25 +15,29 @@ public class HealthManager : MonoBehaviour {
                 return;
             else
             {
-                StateTeller(value);
+                CharaStateTeller(value);
                 state = value;
             }
         }
     }
-    public delegate void StateDelegate(CharacterState state);
-    public event StateDelegate StateTeller;
+    public delegate void DeadDelegate();
+    public static event DeadDelegate DeadTellerStatic;
+    public event DeadDelegate DeadTeller;
+    public delegate void CharaStateDelegate(CharacterState state);
+    public event CharaStateDelegate CharaStateTeller;
     SpriteRenderer sr;
 
     [SerializeField]
     int hp = 3;
 
-    private void Awake()
+    protected void Awake()
     {
         sr = GetComponentInChildren<SpriteRenderer>();
     }
 
     private void OnEnable()
     {
+        sr.color = Color.white;
         State = CharacterState.Idle;
         hp = 3;
     }
@@ -41,7 +45,6 @@ public class HealthManager : MonoBehaviour {
     virtual public void GetDamaged(int damage)
     {
         State = CharacterState.Sturn;
-        Debug.Log(gameObject.name + " get Damaged " + damage + " points");
         hp -= damage;
         StopAllCoroutines();
         StartCoroutine(Timer(1f));
@@ -55,9 +58,14 @@ public class HealthManager : MonoBehaviour {
     {
         if (hp < 1)
         {
+            yield return new WaitForSecondsRealtime(0.1f);
             GameObject effect = ObjPoolManager.Instance.GetObject(ObjectPoolList.BloodEffect);
             effect.transform.position = transform.position;
             effect.SetActive(true);
+            if(DeadTellerStatic != null)
+                DeadTellerStatic();
+            if (DeadTeller != null)
+                DeadTeller();
             ObjPoolManager.Instance.ReturnObject(gameObject);
         }
         for (float t = 0; t < time; t += Time.deltaTime)
@@ -65,7 +73,7 @@ public class HealthManager : MonoBehaviour {
             sr.color = Color.Lerp(Color.red, Color.white, t / time);
             yield return null;
         }
-
+        sr.color = Color.white;
         State = CharacterState.Idle;
     }
 }

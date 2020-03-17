@@ -12,7 +12,7 @@ public class PunchMove : MonoBehaviour {
     private void Awake()
     {
         parent = transform.parent;
-        parent.GetComponent<HealthManager>().StateTeller += StateObserver;
+        parent.GetComponent<HealthManager>().CharaStateTeller += StateObserver;
         if (parent.CompareTag("Player"))
             targetLayer = (1 << LayerMask.NameToLayer("EnemyCharacter"));
         else
@@ -26,6 +26,7 @@ public class PunchMove : MonoBehaviour {
     {
         transform.localPosition = originPos;
         StartCoroutine(Move());
+        SoundManager.Instance.PlaySE(gameObject, AudioClipList.Swing1, AudioClipList.Swing2, AudioClipList.Swing3);
     }
 
     IEnumerator Move()
