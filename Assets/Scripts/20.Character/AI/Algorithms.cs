@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class SeekAlgorithm {
     List<Node> openNodes;
     List<Node> closedNodes;
     List<Node> nodePool;
+    [SerializeField]
     List<Node> finalPath;
 
     public SeekAlgorithm(){
@@ -207,10 +209,16 @@ public class SeekAlgorithm {
 
     bool CanMove(Vector2 start, Vector2 end)
     {
-        return !Physics2D.CircleCast(start, 0.4f, end - start, (end - start).magnitude, Utility.WallLayer);
+        return !Physics2D.CircleCast(start, 0.3f, end - start, (end - start).magnitude, Utility.WallLayer);
+    }
+
+    public void Initialize()
+    {
+        InitNodeLists();
     }
 }
 
+[System.Serializable]
 class Node
 {
     public Vector2Int coord;
@@ -229,13 +237,23 @@ class Node
     }
 }
 
+[System.Serializable]
 public class BoundaryCheckAlgorithm
 {
+    [SerializeField]
     List<GameObject> objList;
+    [SerializeField]
+    GameObject target;
 
     public BoundaryCheckAlgorithm()
     {
         objList = new List<GameObject>();
+    }
+
+    public void Initialize()
+    {
+        objList.Clear();
+        target = null;
     }
 
     Collider2D[] CheckBoundary(GameObject who, float radius, int layer)
@@ -364,12 +382,22 @@ public class BoundaryCheckAlgorithm
 
         QuickSortByDistance(objList, who.transform.position);
         objList = CutOffAlreadyEquiped(objList);
-        
+       
         return objList.Count > 0;
     }
 
     public List<GameObject> GetObjList()
     {
         return objList;
+    }
+
+    public void SetTarget(GameObject _target)
+    {
+        target = _target;
+    }
+
+    public GameObject GetTarget()
+    {
+        return target;
     }
 }

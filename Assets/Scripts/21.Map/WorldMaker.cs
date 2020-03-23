@@ -4,18 +4,18 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 public class WorldMaker : MonoBehaviour {
-    MapDataManager mdm;
+    MapDataManager data;
     public Tilemap obstacleGrid;
     public Tile obstacle;
     string dataFilePath;
     MapList mapNow;
 
-    enum MapList { T0 = -4, T1 = -3, T2 = -2, T3 = -1, S1 = 0, S2 = 1, S3 = 2, S4 = 3 };
+    enum MapList { T0 = -4, T1 = -3, T2 = -2, T3 = -1, S1 = 0, S2 = 1, S3 = 2, S4 = 3, S5 = 4 };
 
     private void Awake()
     {
         mapNow = MapList.T1;
-        mdm = new MapDataManager();
+        data = new MapDataManager();
         dataFilePath = Application.dataPath + "/Resources/MapData/";
         StageManager.Instance.GameStateTeller += GameStateObserver;
     }
@@ -33,13 +33,13 @@ public class WorldMaker : MonoBehaviour {
         }
     }
 
-    MapList GetNextMap(MapList map)
+    MapList GetNextMap(MapList previous)
     {
-        MapList result = map;
+        MapList result = previous;
         if (result >= MapList.S1)
         {
-            while(result == map)
-                result = (MapList)Random.Range(0, 4);
+            while(result == previous)
+                result = (MapList)Random.Range(0, 5);
         }
         else
         {
@@ -51,11 +51,11 @@ public class WorldMaker : MonoBehaviour {
     void InitMap()
     {
         obstacleGrid.ClearAllTiles();
-        mdm.LoadMapData(dataFilePath + mapNow.ToString() + ".xml");
-        SetTileMap(mdm.source.walls, mdm.source.playerSpawn);
-        SetEnemySpawn(mdm.source.enemySpawns, mdm.source.playerSpawn);
-        SetNumberOfEnemy(mdm.source.numberOfEnemy);
-        SetPistol(mdm.source.gunSpawn, mdm.source.playerSpawn);
+        data.LoadMapData(dataFilePath + mapNow.ToString() + ".xml");
+        SetTileMap(data.source.walls, data.source.playerSpawn);
+        SetEnemySpawn(data.source.enemySpawns, data.source.playerSpawn);
+        SetNumberOfEnemy(data.source.numberOfEnemy);
+        SetPistol(data.source.gunSpawn, data.source.playerSpawn);
     }
 
     void SetTileMap(List<Vector2Int> walls, Vector2Int center)

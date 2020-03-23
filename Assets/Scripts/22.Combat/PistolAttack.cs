@@ -26,7 +26,7 @@ public class PistolAttack : AttackBase {
         float sin = Mathf.Sin(transform.eulerAngles.z * Mathf.Deg2Rad);
         Vector2 dir = new Vector2(cos, sin);
         RaycastHit2D hit = Physics2D.Raycast(firePos.position, dir, 2f, targetLayer);
-        Debug.DrawLine(firePos.position, ((Vector2)firePos.position + (dir * 2f)), Color.blue, 1f);
+        //Debug.DrawLine(firePos.position, ((Vector2)firePos.position + (dir * 2f)), Color.blue, 1f);
         Vector3 targetPos;
 
         if (hit)

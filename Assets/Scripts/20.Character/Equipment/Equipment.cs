@@ -22,6 +22,7 @@ public class Equipment : MonoBehaviour {
 
     public void EquipTo(Transform parent)
     {
+        rgbd.velocity = Vector2.zero;
         rgbd.Sleep();
         col2d.enabled = false;
         eKeyUi.SetActive(false);
@@ -81,9 +82,22 @@ public class Equipment : MonoBehaviour {
         transform.SetParent(null);
         col2d.enabled = true;
         rgbd.WakeUp();
-        rgbd.AddForce(new Vector2(Random.Range(-3f, 3f), Random.Range(-3f, 3f)) * 5f);
         transform.eulerAngles = Vector3.zero;
         eKeyUi.SetActive(true);
+        StartCoroutine(ToZeroVelocity());
+    }
+
+    IEnumerator ToZeroVelocity()
+    {
+        Vector2 v = rgbd.velocity;
+
+        for(float t = 0f; t <= 3f; t += Time.deltaTime)
+        {
+            rgbd.velocity = Vector2.Lerp(v, Vector2.zero, t * 0.333f);
+            yield return null;
+        }
+
+        rgbd.velocity = Vector2.zero;
     }
 
     public void ThrowHelper(Vector3 targetPos)

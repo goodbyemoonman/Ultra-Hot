@@ -4,17 +4,25 @@ using UnityEngine;
 
 public class PatrolAI : iAI
 {
-    SeekAlgorithm sa;
     GameObject who;
     MoveHandler mh;
+
+    BoundaryCheckAlgorithm bca;
+    SeekAlgorithm sa;
     List<Vector2> path;
 
     public PatrolAI(BoundaryCheckAlgorithm b, SeekAlgorithm s, GameObject w)
     {
+        bca = b;
         sa = s;
         who = w;
         mh = who.GetComponent<MoveHandler>();
         path = new List<Vector2>();
+    }
+
+    public void Initialize()
+    {
+        path.Clear();
     }
 
     void GetRandomPath()
@@ -26,12 +34,31 @@ public class PatrolAI : iAI
         Vector3 goal = new Vector2(radius * cos, radius * sin);
         goal.x = Utility.V3ToV2I(goal).x;
         goal.y = Utility.V3ToV2I(goal).y;
-        Debug.DrawLine(who.transform.position, goal, Color.blue, 0.5f);
+        //Debug.DrawLine(who.transform.position, goal, Color.blue, 0.5f);
         path = sa.GetPath(who.transform.position, goal);
     }
 
-    public void Check()
+    bool CheckAIChange(AIHolder aiHolder)
     {
+        //바운더리에 오브젝트가 있을 때 추적
+        if (bca.GetObjList().Count != 0)
+        {
+            bca.SetTarget(bca.GetObjList()[0]);
+            if (bca.GetObjList()[0].CompareTag("Player"))
+                aiHolder.SetAI(AIHolder.AIList.ChasePlayer);
+            else
+                aiHolder.SetAI(AIHolder.AIList.ChaseEquip);
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool Check(AIHolder aiHolder)
+    {
+        if (CheckAIChange(aiHolder) == false)
+            return false;
+
         while(path.Count == 0)
         {
             GetRandomPath();
@@ -42,10 +69,15 @@ public class PatrolAI : iAI
         {
             path.RemoveAt(0);
         }
+
+        return true;
     }
 
     public void Do()
     {
+        if (path.Count == 0)
+            return;
+
         mh.MoveToWorldPosition(path[0]);
     }
 }

@@ -3,7 +3,9 @@
 public class AIHolder : MonoBehaviour {
     public enum AIList { Patrol, ChasePlayer, ChaseEquip }
 
+    [SerializeField]
     BoundaryCheckAlgorithm bca;
+    [SerializeField]
     SeekAlgorithm sa;
     ChasePlayerAI chasePlayerAI;
     ChaseEquipAI chaseEquipAI;
@@ -23,9 +25,19 @@ public class AIHolder : MonoBehaviour {
         aiNow = patrolAI;
     }
 
+    private void OnEnable()
+    {
+        sa.Initialize();
+        bca.Initialize();
+        patrolAI.Initialize();
+        chasePlayerAI.Initialize();
+        chaseEquipAI.Initialize();
+        SetAI(AIList.Patrol);
+    }
+
     public void SetAI(AIList ai)
     {
-        Debug.Log("switch AI to " + ai);
+        //Debug.Log("switch AI to " + ai);
         switch (ai)
         {
             case AIList.Patrol:
@@ -42,12 +54,12 @@ public class AIHolder : MonoBehaviour {
 
     private void Update()
     {
-        ChooseAI();
-        aiNow.Check();
-        aiNow.Do();
+        BoundaryCheck();
+        if(aiNow.Check(this))
+            aiNow.Do();
     }
-
-    void ChooseAI()
+    
+    void BoundaryCheck()
     {
         int targetLayer;
         if (actHandler.IsEquipSomething())
@@ -55,24 +67,12 @@ public class AIHolder : MonoBehaviour {
         else
             targetLayer = Utility.PlayerLayer | Utility.EquipmentLayer;
 
-        if (bca.CheckObjListInSight(gameObject, 8f, targetLayer))
+        if (bca.CheckObjListInSight(gameObject, 5f, targetLayer))
         {
-            if (bca.GetObjList()[0].CompareTag("Player"))
+            while (sa.GetPath(transform.position, bca.GetObjList()[0].transform.position).Count == 0)
             {
-                //플레이어 추적으로 변환.
-                aiNow = chasePlayerAI;
-            }
-            else
-            {
-                //무기 추적으로 변환.
-                aiNow = chaseEquipAI;
+                bca.GetObjList().RemoveAt(0);
             }
         }
-        else
-        {
-            //패트롤로 변환
-            aiNow = patrolAI;
-        }
-
     }
 }

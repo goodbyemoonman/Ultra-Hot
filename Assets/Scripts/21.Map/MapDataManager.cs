@@ -50,32 +50,6 @@ public class MapDataManager {
         
     }
 
-    public Vector2Int Str2Vec2(string str)
-    {
-        str.Trim();
-        str = str.Substring(1, str.Length - 2);
-        string[] num = str.Split(',');
-        for (int i = 0; i < num.Length; i++)
-        {
-            Debug.Log(i + " : " + num[i]);
-        }
-        Vector2Int result = new Vector2Int(int.Parse(num[0]), int.Parse(num[1]));
-
-        return result;
-    }
-
-    public void SetMapName(string name)
-    {
-        name.Trim();
-        if (name.Contains(".xml"))
-        {
-            name.Remove(name.Length - ".xml".Length);
-        }
-
-        Debug.Log("Set Map Name to >> " + name);
-        source.mapName = name;
-    }
-
     public void SetWall(Vector2Int coord)
     {
         if (CanSet(coord) == false ||

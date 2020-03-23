@@ -32,7 +32,7 @@ public class ObjPoolRWHelper : ScriptableObject
         TextAsset text = Resources.Load<TextAsset>("ObjectPoolData/ObjectPoolData");
         if (text == null || text.text == null)
         {
-            Debug.Log("can not found ObjectPoolData.xml");
+            //Debug.Log("can not found ObjectPoolData.xml");
             data = new ObjPool();
             return;
         }

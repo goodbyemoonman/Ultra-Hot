@@ -112,7 +112,7 @@ public class ObjPool
                 return;
             }
         }
-        Debug.Log("Can not find Obj Pool : " + go.name);
+        //Debug.Log("Can not find Obj Pool : " + go.name);
         go.SetActive(false);
     }
 }

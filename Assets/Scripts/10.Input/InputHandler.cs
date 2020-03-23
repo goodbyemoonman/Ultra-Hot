@@ -22,7 +22,7 @@ public class InputHandler : MonoBehaviour
     }
 
     private void Update()
-    {
+    { 
         if (!canInputKey)
             return;
         Vector2 dir = new Vector2(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
@@ -84,17 +84,14 @@ public class InputHandler : MonoBehaviour
         {
             case GameStateList.StageReady:
                 player.transform.position = Vector3.zero;
-                canInputKey = false;
                 break;
             case GameStateList.StageStart:
                 canInputKey = true;
                 break;
             case GameStateList.Win:
+            case GameStateList.Defeat:
                 canInputKey = false;
                 mh.StopMove();
-                break;
-            default:
-                canInputKey = false;
                 break;
         }
     }

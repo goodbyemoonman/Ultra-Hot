@@ -1,6 +1,6 @@
 WindowsStandalone
 PlayerPath?
-Z:/testGame/새 폴더/SUPER DODGE.exe
+C:/Users/김명신/Desktop/새 폴더 (3)/Ultra Hot.exe
 SceneListBegin?
 Assets/Scenes/SampleScene.unity
 SceneListEnd?
@@ -159,7 +159,7 @@ fc061f3ae8a876c0687e86378d4a447c UnityEngine.Networking.dll:UnityEngine.Networki
 486cd95c82d8305219c352c06b776e1f Assembly-CSharp.dll:.EnemySpawnerManager
 14dc141be7269dbadd0087d96d152b15 Assembly-CSharp.dll:.HealthManager
 72a8523b432c0a5317826b7a9e0a0e79 Unity.TextMeshPro.dll:TMPro.PackageResourceImporterWindow
-23f8f53924fb4179654e9404cfaf58e2 Assembly-CSharp.dll:.StageManager
+45c7768337051a944b756e09c24a1b43 Assembly-CSharp.dll:.StageManager
 e53cc67d84060d628c7f03fc725766d8 Unity.TextMeshPro.dll:TMPro.TMP_FontAsset
 392c5b921098bd4c139d9146d0efa6d7 Unity.TextMeshPro.dll:TMPro.TMP_Settings
 486cd95c82d8305219c352c06b776e1f Assembly-CSharp.dll:.Screen
@@ -178,7 +178,7 @@ e033f131358cea5a0eabf9561e781deb UnityEngine.TestRunner.dll:UnityEngine.TestTool
 486cd95c82d8305219c352c06b776e1f Assembly-CSharp.dll:.PunchMove
 486cd95c82d8305219c352c06b776e1f Assembly-CSharp.dll:.BloodEffectCallback
 486cd95c82d8305219c352c06b776e1f Assembly-CSharp.dll:.Test2
-486cd95c82d8305219c352c06b776e1f Assembly-CSharp.dll:.AIHolder
+de1f6e7e456d38ebb97ef6da430c95ae Assembly-CSharp.dll:.AIHolder
 486cd95c82d8305219c352c06b776e1f Assembly-CSharp.dll:.BulletMove
 d75dc834c5dec688db75a55a1724c90f UnityEngine.HoloLens.dll:UnityEngine.Audio.AudioSpatializerMicrosoft
 486cd95c82d8305219c352c06b776e1f UnityEngine.HoloLens.dll:UnityEngine.EventSystems.HoloLensInput

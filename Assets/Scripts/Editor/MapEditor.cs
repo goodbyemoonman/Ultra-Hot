@@ -7,7 +7,7 @@ public class MapEditor : EditorWindow
 {
     static MapDataManager data;
     BrushType brushNow = BrushType.WALL;
-    Vector2Int tmpSom;
+    Vector2Int tmpMapSize;
     Vector2 scrollPos;
     Rect[,] rects;
     Rect preMouseRect;
@@ -41,24 +41,28 @@ public class MapEditor : EditorWindow
         if (data == null)
             return;
 
+        //맵 사이즈와 Generate part
         EditorGUILayout.BeginHorizontal();
         {
-            tmpSom = EditorGUILayout.Vector2IntField("Size of Map", tmpSom, GUILayout.Width(300));
-            tmpSom.x = Mathf.Clamp(tmpSom.x, 0, 50);
-            tmpSom.y = Mathf.Clamp(tmpSom.y, 0, 50);
+            tmpMapSize = EditorGUILayout.Vector2IntField("Size of Map", tmpMapSize, GUILayout.Width(300));
+            tmpMapSize.x = Mathf.Clamp(tmpMapSize.x, 0, 50);
+            tmpMapSize.y = Mathf.Clamp(tmpMapSize.y, 0, 50);
             if (GUILayout.Button("Generate", GUILayout.Width(100))){
                 GenerateNewMap();
             }
         }
         EditorGUILayout.EndHorizontal();
 
+        //데이터에 맞는 맵 그리기
         DrawMap();
 
+        //마우스의 입력 처리
         if (Event.current.type == EventType.MouseDown)
         {
             ClickEvent(GetCoordWithPosition(Event.current.mousePosition));
         }
 
+        //브러쉬 선택하는 툴바 버튼
         EditorGUILayout.BeginHorizontal(GUILayout.Width(400));
         {
             brushNow = (BrushType)GUILayout.Toolbar((int)brushNow - 1,
@@ -70,29 +74,24 @@ public class MapEditor : EditorWindow
                 }) + 1;
         }
         EditorGUILayout.EndHorizontal();
+
+        //등장할 적의 수
         EditorGUILayout.BeginHorizontal();
         {
-            data.SetNumberOfEnemy(EditorGUILayout.IntField("Number of Enemy", data.source.numberOfEnemy, GUILayout.Width(300)));
+            int tmpNumberOfEnemy = EditorGUILayout.IntField("Number of Enemy", data.source.numberOfEnemy, GUILayout.Width(300));
+            if(tmpNumberOfEnemy != data.source.numberOfEnemy)
+                data.SetNumberOfEnemy(tmpNumberOfEnemy);
         }
         EditorGUILayout.EndHorizontal();
+
+        //브러쉬에 따른 박스의 색 미리보기
         EditorGUILayout.BeginHorizontal();
         {
-            Color originC = GUI.backgroundColor;
-            GUI.backgroundColor = colors[(int)BrushType.WALL];
-            GUILayout.Box("",GUILayout.Width(30));
-            GUILayout.Label("Wall", GUILayout.Width(50));
-            GUI.backgroundColor = colors[(int)BrushType.ENEMYSPAWN];
-            GUILayout.Box("", GUILayout.Width(30));
-            GUILayout.Label("Enemy", GUILayout.Width(50));
-            GUI.backgroundColor = colors[(int)BrushType.PLAYERSPAWN];
-            GUILayout.Box("", GUILayout.Width(30));
-            GUILayout.Label("Player", GUILayout.Width(50));
-            GUI.backgroundColor = colors[(int)BrushType.GUN];
-            GUILayout.Box("", GUILayout.Width(30));
-            GUILayout.Label("Gun", GUILayout.Width(50));
-            GUI.backgroundColor = originC;
+            DrawBoxPreview();
         }
         EditorGUILayout.EndHorizontal();
+
+        //맵의 저장과 불러오기 버튼
         EditorGUILayout.BeginHorizontal(GUILayout.Width(400));
         {
             if (GUI.Button(new Rect(underScrollArea, new Vector2(150, EditorGUIUtility.singleLineHeight)), "Load Map"))
@@ -101,8 +100,7 @@ public class MapEditor : EditorWindow
                 if (path.Length != 0)
                 {
                     Debug.Log("Load Path >>" + path);
-                    data.LoadMapData(path);
-                    LoadMap();
+                    LoadMap(path);
                 }
             }
 
@@ -115,29 +113,52 @@ public class MapEditor : EditorWindow
                 if (path.Length != 0)
                 {
                     Debug.Log("Save Map Data At >>" + path);
-                    data.SaveMapData(path);
-                    AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+                    SaveMap(path);
                 }
             }
         }
         EditorGUILayout.EndHorizontal();
     }
 
+    void DrawBoxPreview()
+    {
+        Color originC = GUI.backgroundColor;
+        GUI.backgroundColor = colors[(int)BrushType.WALL];
+        GUILayout.Box("", GUILayout.Width(30));
+        GUILayout.Label("Wall", GUILayout.Width(50));
+        GUI.backgroundColor = colors[(int)BrushType.ENEMYSPAWN];
+        GUILayout.Box("", GUILayout.Width(30));
+        GUILayout.Label("Enemy", GUILayout.Width(50));
+        GUI.backgroundColor = colors[(int)BrushType.PLAYERSPAWN];
+        GUILayout.Box("", GUILayout.Width(30));
+        GUILayout.Label("Player", GUILayout.Width(50));
+        GUI.backgroundColor = colors[(int)BrushType.GUN];
+        GUILayout.Box("", GUILayout.Width(30));
+        GUILayout.Label("Gun", GUILayout.Width(50));
+        GUI.backgroundColor = originC;
+    }
 
     void GenerateNewMap()
     {
         data.ClearMapData();
-        data.SetMapSize(tmpSom);
-        GenerateBoxGrid();
+        data.SetMapSize(tmpMapSize);
+        GenerateGridRects();
     }
 
-    void LoadMap()
+    void LoadMap(string path)
     {
-        tmpSom = data.source.mapSize;
-        GenerateBoxGrid();
+        data.LoadMapData(path);
+        tmpMapSize = data.source.mapSize;
+        GenerateGridRects();
     }
 
-    void GenerateBoxGrid()
+    void SaveMap(string path)
+    {
+        data.SaveMapData(path);
+        AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+    }
+
+    void GenerateGridRects()
     {
         rects = new Rect[data.source.mapSize.x, data.source.mapSize.y];
 

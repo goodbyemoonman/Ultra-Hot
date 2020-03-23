@@ -542,6 +542,30 @@
       <x>11</x>
       <y>17</y>
     </Vector2Int>
+    <Vector2Int>
+      <x>0</x>
+      <y>17</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>7</x>
+      <y>15</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>11</x>
+      <y>15</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>9</x>
+      <y>15</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>2</x>
+      <y>11</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>16</x>
+      <y>11</y>
+    </Vector2Int>
   </walls>
   <enemySpawns>
     <Vector2Int>

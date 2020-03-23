@@ -13,7 +13,8 @@ public class Screen : MonoBehaviour
     List<Animator> screens;
 
     [ContextMenu("Initialze")]
-    public void Initialize()
+    
+    private void Start()
     {
         if (screens != null)
             return;

@@ -268,6 +268,10 @@
       <x>1</x>
       <y>5</y>
     </Vector2Int>
+    <Vector2Int>
+      <x>1</x>
+      <y>1</y>
+    </Vector2Int>
   </enemySpawns>
   <gunSpawn>
     <Vector2Int>
@@ -281,6 +285,10 @@
     <Vector2Int>
       <x>13</x>
       <y>3</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>18</x>
+      <y>2</y>
     </Vector2Int>
   </gunSpawn>
   <playerSpawn>

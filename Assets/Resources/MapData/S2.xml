@@ -39,10 +39,6 @@
       <y>4</y>
     </Vector2Int>
     <Vector2Int>
-      <x>1</x>
-      <y>4</y>
-    </Vector2Int>
-    <Vector2Int>
       <x>0</x>
       <y>3</y>
     </Vector2Int>
@@ -52,10 +48,6 @@
     </Vector2Int>
     <Vector2Int>
       <x>1</x>
-      <y>5</y>
-    </Vector2Int>
-    <Vector2Int>
-      <x>1</x>
       <y>6</y>
     </Vector2Int>
     <Vector2Int>
@@ -64,27 +56,7 @@
     </Vector2Int>
     <Vector2Int>
       <x>3</x>
-      <y>6</y>
-    </Vector2Int>
-    <Vector2Int>
-      <x>3</x>
-      <y>7</y>
-    </Vector2Int>
-    <Vector2Int>
-      <x>1</x>
       <y>8</y>
-    </Vector2Int>
-    <Vector2Int>
-      <x>3</x>
-      <y>8</y>
-    </Vector2Int>
-    <Vector2Int>
-      <x>3</x>
-      <y>10</y>
-    </Vector2Int>
-    <Vector2Int>
-      <x>1</x>
-      <y>9</y>
     </Vector2Int>
     <Vector2Int>
       <x>1</x>
@@ -155,18 +127,6 @@
       <y>15</y>
     </Vector2Int>
     <Vector2Int>
-      <x>3</x>
-      <y>11</y>
-    </Vector2Int>
-    <Vector2Int>
-      <x>3</x>
-      <y>12</y>
-    </Vector2Int>
-    <Vector2Int>
-      <x>1</x>
-      <y>12</y>
-    </Vector2Int>
-    <Vector2Int>
       <x>4</x>
       <y>9</y>
     </Vector2Int>
@@ -233,19 +193,39 @@
     <Vector2Int>
       <x>4</x>
       <y>12</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>0</x>
+      <y>5</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>4</x>
+      <y>7</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>0</x>
+      <y>9</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>4</x>
+      <y>11</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>3</x>
+      <y>12</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>2</x>
+      <y>6</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>2</x>
+      <y>8</y>
     </Vector2Int>
   </walls>
   <enemySpawns>
     <Vector2Int>
       <x>1</x>
-      <y>17</y>
-    </Vector2Int>
-    <Vector2Int>
-      <x>3</x>
-      <y>17</y>
-    </Vector2Int>
-    <Vector2Int>
-      <x>1</x>
       <y>11</y>
     </Vector2Int>
     <Vector2Int>
@@ -255,6 +235,14 @@
     <Vector2Int>
       <x>1</x>
       <y>7</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>1</x>
+      <y>15</y>
+    </Vector2Int>
+    <Vector2Int>
+      <x>3</x>
+      <y>15</y>
     </Vector2Int>
   </enemySpawns>
   <gunSpawn>
@@ -263,16 +251,16 @@
       <y>5</y>
     </Vector2Int>
     <Vector2Int>
+      <x>3</x>
+      <y>11</y>
+    </Vector2Int>
+    <Vector2Int>
       <x>1</x>
-      <y>14</y>
+      <y>18</y>
     </Vector2Int>
     <Vector2Int>
       <x>3</x>
-      <y>13</y>
-    </Vector2Int>
-    <Vector2Int>
-      <x>2</x>
-      <y>10</y>
+      <y>18</y>
     </Vector2Int>
   </gunSpawn>
   <playerSpawn>

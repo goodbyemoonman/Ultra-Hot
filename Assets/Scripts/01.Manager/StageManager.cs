@@ -15,9 +15,10 @@ public class StageManager : Singleton<StageManager>
 
     public List<GameObject> ActiveOnStageReady;
     public GameObject gameTitleText;
-    public GameObject clickButton;
-    public GameObject clickText;
-    public TextMeshProUGUI text;
+    public GameObject gameStartButton;
+    public GameObject clickToStartText;
+    public GameObject toNextStageButton;
+    public TextMeshProUGUI NotificationText;
     List<GameObject> enemySpawners;
     int deadEnemyCount;
     int numberOfEnemy;
@@ -29,15 +30,47 @@ public class StageManager : Singleton<StageManager>
         screen = GetComponent<Screen>();
         enemySpawners = new List<GameObject>();
         HealthManager.DeadTellerStatic += EnemyDeadObserver;
+        GameStateTeller += GameStateObserver;
     }
 
     void Start()
     {
         GameStateTeller(GameStateList.GameTitle);
-        clickText.SetActive(true);
-        clickButton.SetActive(true);
+    }
+
+    void AtGameTitle()
+    {
+        clickToStartText.SetActive(true);
+        gameStartButton.SetActive(true);
         openingCeremony = OpeningCeremony(2);
         StartCoroutine(openingCeremony);
+    }
+
+    void GameStateObserver(GameStateList state)
+    {
+        switch (state)
+        {
+            case GameStateList.GameTitle:
+                AtGameTitle();
+                break;
+            case GameStateList.StageReady:
+                AtStageReady();
+                break;
+            case GameStateList.StageStart:
+                StopAllCoroutines();
+                StartCoroutine(EnemyRespawn(numberOfEnemy));
+                break;
+            case GameStateList.Defeat:
+                StopAllCoroutines();
+                NotifyMsg("DEFEAT");
+                StartCoroutine(AfterDefeat());
+                break;
+            case GameStateList.Win:
+                StopAllCoroutines();
+                NotifyMsg("STAGE CLEAR");
+                StartCoroutine(AfterWin());
+                break;
+        }
     }
 
     IEnumerator OpeningCeremony(float t)
@@ -53,17 +86,26 @@ public class StageManager : Singleton<StageManager>
     }
 
     [ContextMenu("Stage Start")]
-    //메인 윈도우에서 이벤트 트리거로 클릭시 발동.
-    public void StartStage()
+    //GameStartButton GameObject 에서 이벤트 트리거로 클릭시 발동.
+    public void GameStartButton()
     {
         StopAllCoroutines();
-        screen.Initialize();
         gameTitleText.SetActive(false);
-        clickButton.SetActive(false);
-        clickText.SetActive(false);
+        gameStartButton.SetActive(false);
+        clickToStartText.SetActive(false);
+
         StartCoroutine(AfterWin());
     }
 
+    //ToNextStageButton GameObject 에서 이벤트 트리거로 클릭시 발동.
+    public void ToNextStageButton()
+    {
+        StopAllCoroutines();
+        toNextStageButton.SetActive(false);
+        StartCoroutine(ToNextStage());
+    }
+    
+    #region Using by WorldMaker Script
     public void AddEnemySpawner(GameObject spawner)
     {
         enemySpawners.Add(spawner);
@@ -73,7 +115,75 @@ public class StageManager : Singleton<StageManager>
     {
         numberOfEnemy = num;
     }
-    
+    #endregion
+
+    void BeforeStageReady()
+    {
+        enemySpawners.Clear();
+        deadEnemyCount = 0;
+    }
+
+    public void DefeatStage()
+    {
+        GameStateTeller(GameStateList.Defeat);
+    }
+
+    void EnemyDeadObserver()
+    {
+        deadEnemyCount++;
+        if (deadEnemyCount == numberOfEnemy)
+        {
+            if (GameStateTeller != null)
+                GameStateTeller(GameStateList.Win);
+        }
+    }
+
+    void AtStageReady()
+    {
+        for(int i = 0; i < ActiveOnStageReady.Count; i++)
+        {
+            ActiveOnStageReady[i].SetActive(true);
+        }
+        clickToStartText.SetActive(true);
+        toNextStageButton.SetActive(true);
+    }
+
+    IEnumerator AfterDefeat()
+    {
+        openingCeremony = OpeningCeremony(8);
+        StartCoroutine(openingCeremony);
+
+        BeforeStageReady();
+
+        yield return StartCoroutine(screen.ChangeScreen(true));
+        clickToStartText.SetActive(true);
+
+        if (GameStateTeller != null)
+            GameStateTeller(GameStateList.StageReady);
+
+    }
+
+    IEnumerator AfterWin()
+    {
+        BeforeStageReady();
+
+        yield return StartCoroutine(screen.ChangeScreen(true));
+        clickToStartText.SetActive(true);
+
+        if (GameStateTeller != null)
+            GameStateTeller(GameStateList.StageReady);
+    }
+
+    IEnumerator ToNextStage()
+    {
+        NotifyMsg("");
+        clickToStartText.SetActive(false);
+        sightManager.RefreshSight();
+        yield return StartCoroutine(screen.ChangeScreen(false));
+        if (GameStateTeller != null)
+            GameStateTeller(GameStateList.StageStart);
+    }
+
     IEnumerator EnemyRespawn(int max)
     {
         yield return new WaitForSeconds(0.5f);
@@ -94,78 +204,15 @@ public class StageManager : Singleton<StageManager>
             newEnemy.SetActive(true);
         }
     }
-
-    public void DefeatStage()
+    
+    void NotifyMsg(string msg)
     {
-        StopAllCoroutines();
-        GameStateTeller(GameStateList.Defeat);
-        StartCoroutine(AfterDefeat());
-    }
-
-    void EnemyDeadObserver()
-    {
-        deadEnemyCount++;
-        if (deadEnemyCount == numberOfEnemy)
+        if (msg == "")
+            NotificationText.gameObject.SetActive(false);
+        else
         {
-            TextMsg("Stage Clear");
-            if (GameStateTeller != null)
-                GameStateTeller(GameStateList.Win);
-            StartCoroutine(AfterWin());
+            NotificationText.text = msg;
+            NotificationText.gameObject.SetActive(true);
         }
-    }
-
-    IEnumerator AfterDefeat()
-    {
-        openingCeremony = OpeningCeremony(8);
-        StartCoroutine(openingCeremony);
-        TextMsg("Stage Fail");
-        yield return StartCoroutine(screen.ChangeScreen(true));
-        enemySpawners.Clear();
-        deadEnemyCount = 0;
-
-        if (GameStateTeller != null)
-            GameStateTeller(GameStateList.StageReady);
-        clickText.SetActive(true);
-
-        while (!Input.GetMouseButtonDown(0))
-            yield return null;
-        StopCoroutine(openingCeremony);
-        StartCoroutine(StageBegin());
-    }
-
-    IEnumerator AfterWin()
-    {
-        yield return StartCoroutine(screen.ChangeScreen(true));
-        enemySpawners.Clear();
-        deadEnemyCount = 0;
-        if (GameStateTeller != null)
-            GameStateTeller(GameStateList.StageReady);
-        for(int i = 0; i < ActiveOnStageReady.Count; i++)
-        {
-            ActiveOnStageReady[i].SetActive(true);
-        }
-        clickText.SetActive(true);
-        while (!Input.GetMouseButtonDown(0))
-        {
-            yield return null;
-        }
-        StartCoroutine(StageBegin());
-    }
-
-    IEnumerator StageBegin()
-    {
-        TextMsg("");
-        clickText.SetActive(false);
-        sightManager.RefreshSight();
-        yield return StartCoroutine(screen.ChangeScreen(false));
-        if (GameStateTeller != null)
-            GameStateTeller(GameStateList.StageStart);
-
-        StartCoroutine(EnemyRespawn(numberOfEnemy));
-    }
-
-    void TextMsg(string msg)
-    {
-         text.text = msg;
     }
 }

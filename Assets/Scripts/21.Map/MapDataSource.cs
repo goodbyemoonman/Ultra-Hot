@@ -5,7 +5,6 @@ using UnityEngine;
 [System.Serializable]
 public class MapDataSource {
     public Vector2Int mapSize;
-    public string mapName;
     public List<Vector2Int> walls;
     public List<Vector2Int> enemySpawns;
     public List<Vector2Int> gunSpawn;
@@ -25,7 +24,6 @@ public class MapDataSource {
         enemySpawns.Clear();
         gunSpawn.Clear();
         mapSize = Vector2Int.one;
-        mapName = "NewMap";
         playerSpawn = Vector2Int.zero;
         numberOfEnemy = 0;
     }

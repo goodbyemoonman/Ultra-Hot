@@ -76,7 +76,6 @@ public class SightManager : MonoBehaviour
 
 class SightData
 {
-    int wallLayer = 1 << LayerMask.NameToLayer("Wall");
     Transform boxTf;
     Transform circleTf;
 
@@ -114,7 +113,7 @@ class SightData
             sin * targetPos.x + cos * targetPos.y, 0);
 
         RaycastHit2D hit = Physics2D.Raycast(boxTf.position, rotatedTarget,
-            targetPos.magnitude, wallLayer);
+            targetPos.magnitude, Utility.WallLayer);
 
         Vector3 newScale = boxTf.localScale;
 

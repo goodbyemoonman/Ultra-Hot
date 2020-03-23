@@ -13,6 +13,12 @@ public class ChaseEquipAI : iAI
     List<Vector2> path;
     Vector3 targetPos;
 
+    public void Initialize()
+    {
+        path.Clear();
+        targetPos = Vector3.zero;
+    }
+
     public ChaseEquipAI(BoundaryCheckAlgorithm b, SeekAlgorithm s, GameObject who)
     {
         bca = b;
@@ -23,9 +29,46 @@ public class ChaseEquipAI : iAI
         moveHandler = who.GetComponent<MoveHandler>();
     }
 
-    public void Check()
+    bool CheckAIChange(AIHolder aiHolder)
     {
-        targetPos = bca.GetObjList()[0].transform.position;
+        //타겟이 없어졌네?
+        if(bca.GetTarget().transform.parent != null || 
+            bca.GetTarget().activeInHierarchy == false)
+        {
+            bca.SetTarget(null);
+            aiHolder.SetAI(AIHolder.AIList.Patrol);
+            return false;
+        }
+
+        //바운더리에 오브젝트가 없네 (길찾기로 가던 도중 타겟에서 멀어질 수 있어)
+        if (bca.GetObjList().Count == 0)
+        {
+            //그래도 타겟은 있으니까
+            return true;
+        }
+        //바운더리의 오브젝트와 쫓던 오브젝트가 다를 때
+        else if (bca.GetTarget() != bca.GetObjList()[0])
+        {
+            //새 오브젝트를 추적
+            bca.SetTarget(bca.GetObjList()[0]);
+            if (bca.GetObjList()[0].CompareTag("Player"))
+                aiHolder.SetAI(AIHolder.AIList.ChasePlayer);
+            else
+                aiHolder.SetAI(AIHolder.AIList.ChaseEquip);
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool Check(AIHolder aiHolder)
+    {
+        if (CheckAIChange(aiHolder) == false)
+        {   //ai 변경
+            return false;
+        }
+
+        targetPos = bca.GetTarget().transform.position;
 
         path = sa.GetPath((who.transform.position), targetPos);
 
@@ -34,6 +77,8 @@ public class ChaseEquipAI : iAI
         {
             path.RemoveAt(0);
         }
+
+        return true;
     }
 
     public void Do()

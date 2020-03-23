@@ -52,7 +52,7 @@ public class PunchMove : MonoBehaviour {
 
         hits = Physics2D.RaycastAll(origin, ((Vector2)transform.position - origin),
             ((Vector2)transform.position - origin).magnitude, targetLayer);
-        Debug.DrawLine(origin, (Vector2)transform.position, Color.blue, 0.5f);
+        //Debug.DrawLine(origin, (Vector2)transform.position, Color.blue, 0.5f);
 
         foreach(RaycastHit2D hit in hits)
         {

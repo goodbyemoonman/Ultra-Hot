@@ -271,5 +271,5 @@
     <x>1</x>
     <y>2</y>
   </playerSpawn>
-  <numberOfEnemy>5</numberOfEnemy>
+  <numberOfEnemy>6</numberOfEnemy>
 </MapDataSource>
