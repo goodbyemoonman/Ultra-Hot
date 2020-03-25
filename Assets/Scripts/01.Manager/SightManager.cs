@@ -10,7 +10,7 @@ public class SightManager : MonoBehaviour
     List<SightData> sight;
     readonly int maxCount = 100;
     readonly float baseRotateAngleRad = 2.3f; //120도 정도?
-    readonly Vector3 fogStartPos = new Vector3(5, 10, 0);
+    readonly Vector3 sightStartPos = new Vector3(5, 10, 0);
     Transform parent;
 
     private void Awake()
@@ -36,7 +36,7 @@ public class SightManager : MonoBehaviour
 
     void InitSight()
     {
-        Vector3[] fogTargetPos = GetFogTargetPos(fogStartPos);
+        Vector3[] fogTargetPos = GetDefaultSightLinePos(sightStartPos);
 
         for (int i = 0; i < fogTargetPos.Length; i++)
         {
@@ -47,7 +47,7 @@ public class SightManager : MonoBehaviour
         }
     }
 
-    Vector3[] GetFogTargetPos(Vector3 baseLinePos)
+    Vector3[] GetDefaultSightLinePos(Vector3 baseLinePos)
     {
         int count = maxCount;
         if (count == 0)

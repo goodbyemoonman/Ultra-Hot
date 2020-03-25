@@ -2,17 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ChasePlayerAI : iAI
+public class ChasePlayerAI : AbstractAI
 {
-    GameObject who;
-    ActHandler actHandler;
-    MoveHandler moveHandler;
-
-    BoundaryCheckAlgorithm bca;
-    SeekAlgorithm sa;
-    List<Vector2> path;
-    Vector3 targetPos;
-
     public void Initialize()
     {
         path.Clear();
@@ -29,7 +20,7 @@ public class ChasePlayerAI : iAI
         actHandler = who.GetComponent<ActHandler>();
     }
 
-    bool checkAIChange(AIHolder aiHolder)
+    public override bool CheckAIChange(AIHolder aiHolder)
     {
         //바운더리에 오브젝트가 없네
         if (bca.GetObjList().Count == 0)
@@ -56,9 +47,9 @@ public class ChasePlayerAI : iAI
         return true;
     }
 
-    public bool Check(AIHolder aiHolder)
+    public override bool Check(AIHolder aiHolder)
     {
-        if (checkAIChange(aiHolder) == false)
+        if (CheckAIChange(aiHolder) == false)
         {
             return false;
         }
@@ -76,7 +67,7 @@ public class ChasePlayerAI : iAI
         return true;
     }
 
-    public void Do()
+    public override void Do()
     {
         if (path.Count == 0)
             return;

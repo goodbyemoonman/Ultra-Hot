@@ -74,11 +74,11 @@
     <Compile Include="Assets\Scripts\03.ObjPool\ObjPoolRWHelper.cs" />
     <Compile Include="Assets\Scripts\10.Input\InputHandler.cs" />
     <Compile Include="Assets\Scripts\20.Character\ActHandler.cs" />
+    <Compile Include="Assets\Scripts\20.Character\AI\AbstractAI.cs" />
     <Compile Include="Assets\Scripts\20.Character\AI\AIHolder.cs" />
     <Compile Include="Assets\Scripts\20.Character\AI\Algorithms.cs" />
     <Compile Include="Assets\Scripts\20.Character\AI\ChaseEquipAI.cs" />
     <Compile Include="Assets\Scripts\20.Character\AI\ChasePlayerAI.cs" />
-    <Compile Include="Assets\Scripts\20.Character\AI\iAI.cs" />
     <Compile Include="Assets\Scripts\20.Character\AI\PatrolAI.cs" />
     <Compile Include="Assets\Scripts\20.Character\Equipment\EquipHolder.cs" />
     <Compile Include="Assets\Scripts\20.Character\Equipment\Equipment.cs" />

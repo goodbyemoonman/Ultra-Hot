@@ -6,29 +6,34 @@ using UnityEngine.UI;
 
 public class TestScript : MonoBehaviour
 {
-    public Transform target;
-    public Text text;
-    Rigidbody2D rgbd;
-    Vector3 originPos;
-    float t = 0;
+    public Transform start;
+    public Transform end;
 
-    private void OnEnable()
+    SeekAlgorithm sa = new SeekAlgorithm();
+    List<Vector2> path = new List<Vector2>();
+
+    [ContextMenu("Find Path")]
+    void FindPath()
     {
-        rgbd = GetComponent<Rigidbody2D>();
-        originPos = transform.position;
-        t = 0;
-        StopAllCoroutines();
-        StartCoroutine(move());
+        path = sa.GetPath(start.position, end.position, false);
     }
 
-    IEnumerator move()
+    [ContextMenu("Pretty Path")]
+    void PrettyPath()
     {
-        while(t <= 1)
+        path = sa.GetPath(start.position, end.position, true);
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (path.Count == 0)
+            return;
+        Gizmos.color = Color.blue;
+        Gizmos.DrawLine(transform.position, path[0]);
+        for (int i = 0; i < path.Count - 1; i++)
         {
-            Vector3 newPos = Vector3.Lerp(originPos, target.position, t += 0.01f * Time.timeScale);
-            rgbd.MovePosition(newPos);
-            text.text = t.ToString();
-            yield return new WaitForSecondsRealtime(0.01f);
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(path[i], path[i + 1]);
         }
     }
 }

@@ -159,7 +159,7 @@ public class SeekAlgorithm {
 
     }
     
-    public List<Vector2> GetPath(Vector3 start, Vector3 goal)
+    public List<Vector2> GetPath(Vector3 start, Vector3 goal, bool isPretty = true)
     {
         seek(Utility.V3ToV2I(start), Utility.V3ToV2I(goal));
 
@@ -172,9 +172,12 @@ public class SeekAlgorithm {
         if (result.Count == 0)
             return result;
 
+        
         result.Insert(0, start);
         result[result.Count - 1] = goal;
-        result = PrettyPath(result);
+        if(isPretty)
+            result = PrettyPath(result);
+
         return result;
     }
 

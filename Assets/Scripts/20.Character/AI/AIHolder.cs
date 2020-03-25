@@ -10,7 +10,7 @@ public class AIHolder : MonoBehaviour {
     ChasePlayerAI chasePlayerAI;
     ChaseEquipAI chaseEquipAI;
     PatrolAI patrolAI;
-    iAI aiNow;
+    AbstractAI aiNow;
 
     ActHandler actHandler;
 

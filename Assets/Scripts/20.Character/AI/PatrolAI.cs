@@ -2,21 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PatrolAI : iAI
+public class PatrolAI : AbstractAI
 {
-    GameObject who;
-    MoveHandler mh;
-
-    BoundaryCheckAlgorithm bca;
-    SeekAlgorithm sa;
-    List<Vector2> path;
-
     public PatrolAI(BoundaryCheckAlgorithm b, SeekAlgorithm s, GameObject w)
     {
         bca = b;
         sa = s;
         who = w;
-        mh = who.GetComponent<MoveHandler>();
+        moveHandler = who.GetComponent<MoveHandler>();
         path = new List<Vector2>();
     }
 
@@ -38,7 +31,7 @@ public class PatrolAI : iAI
         path = sa.GetPath(who.transform.position, goal);
     }
 
-    bool CheckAIChange(AIHolder aiHolder)
+    public override bool CheckAIChange(AIHolder aiHolder)
     {
         //바운더리에 오브젝트가 있을 때 추적
         if (bca.GetObjList().Count != 0)
@@ -54,7 +47,7 @@ public class PatrolAI : iAI
         return true;
     }
 
-    public bool Check(AIHolder aiHolder)
+    public override bool Check(AIHolder aiHolder)
     {
         if (CheckAIChange(aiHolder) == false)
             return false;
@@ -73,11 +66,11 @@ public class PatrolAI : iAI
         return true;
     }
 
-    public void Do()
+    public override void Do()
     {
         if (path.Count == 0)
             return;
 
-        mh.MoveToWorldPosition(path[0]);
+        moveHandler.MoveToWorldPosition(path[0]);
     }
 }
